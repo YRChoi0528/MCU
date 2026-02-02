@@ -20,7 +20,7 @@
 
 ### 2.2 빌드 및 다운로드 절차
 
-1. IAR Embedded Workbench에서 프로젝트 빌드
+1. IAR Embedded Workbench에서 프로젝트 빌드 (Project → Clean , Project → Make)
 2. `.hex` 파일 생성
 3. DFU File Manager를 이용해 `.hex` → `.dfu` 변환
 4. Dfuse Demonstration을 통해 MCU 장비에 다운로드
