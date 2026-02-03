@@ -98,3 +98,16 @@
 
 를 목적으로 한다. 향후 임베디드 시스템 관련 학습 및 프로젝트를 진행할 때 기초 자료로 활용하는 것을 목표로 한다.
 
+---
+## License and Notice
+
+This repository does NOT include any original STM32 vendor source code.
+
+All STM32 standard peripheral headers and source files
+(e.g., stm32f10x_conf.h, stm32f10x_type.h)
+are the property of STMicroelectronics and must be obtained
+from the official ST distribution.
+
+This repository contains only documentation and explanations
+written by the author for educational purposes.
+
