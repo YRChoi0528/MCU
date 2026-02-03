@@ -27,15 +27,14 @@ int main(void)
     inc(&s);
     printf("s.a=%d s.b=%d\n", s.a, s.b);
 
-    {
-        S t[3] = {{1,2},{3,4},{5,6}};
-        for (int i = 0; i < 3; i++)
-            printf("%d\n", sum(t[i]));
-    }
-
     printf("s의 주소: %p\n", &s);
     printf("s.a의 주소: %p\n", &s.a);
     printf("s.b의 주소: %p\n", &s.b);
 
+    S t[3] = {{1,2},{3,4},{5,6}};
+    for (int i = 0; i < 3; i++)
+        printf("%d\n", sum(t[i]));
+
     return 0;
+
 }
