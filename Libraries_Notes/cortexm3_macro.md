@@ -1,9 +1,4 @@
 
----
-
-# 2️⃣ `cortexm3_macro.md`
-
-```md
 # cortexm3_macro.h 정리
 
 ## 역할 (한 줄 요약)
@@ -65,3 +60,4 @@ RTOS나 고급 시스템 코드에서 등장한다.
 DISABLE_IRQ();
 // 공유 자원 접근
 ENABLE_IRQ();
+```
