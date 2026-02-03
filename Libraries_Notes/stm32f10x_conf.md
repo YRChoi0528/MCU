@@ -17,7 +17,7 @@
 
 ---
 
-## 핵심 구성 요소
+## 구성 요소
 
 ### 1) 헤더 가드(중복 include 방지)
 - `#ifndef __STM32F10x_CONF_H` ~ `#endif`
