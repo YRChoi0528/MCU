@@ -14,9 +14,8 @@
 /* 괄호를 넣어 우선순위 문제를 줄인 매크로 */
 #define SQ(x) ((x) * (x))
 
-/* 조건부 컴파일용(값은 빌드 옵션 -DDBG=1 등으로 바꿀 수 있음) */
 #ifndef DBG
-#define DBG 0
+#define DBG 1
 #endif
 
 #if DBG
