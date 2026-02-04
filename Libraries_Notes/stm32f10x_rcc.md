@@ -8,9 +8,9 @@
 
 ## 파일 구성
 - **stm32f10x_rcc.h**
-  - RCC 라이브러리에서 제공하는 함수들의 *프로토타입*
+  - RCC 라이브러리에서 제공하는 함수들의 **프로토타입**
   - RCC 설정 결과를 담기 위한 `RCC_ClocksTypeDef` 구조체
-  - RCC 설정에 사용되는 *매크로 상수* 및 파라미터 검사용 매크로
+  - RCC 설정에 사용되는 **매크로 상수** 및 파라미터 검사용 매크로
 - **stm32f10x_rcc.c**
   - 헤더에 선언된 함수들의 실제 구현
   - RCC 레지스터(`RCC->CR`, `RCC->CFGR`, `RCC->APB2ENR` 등)에 대한 접근 코드 포함
@@ -30,13 +30,12 @@ typedef struct
 ```
 
 이 구조체는 현재 RCC 설정을 기준으로 계산된 각 클럭 도메인의 주파수를 저장하기 위해 사용된다.
-측정값이 아니라, 설정 레지스터를 기반으로 *계산된 결과*를 담는다.
+측정값이 아니라, 설정 레지스터를 기반으로 **계산된 결과**를 담는다.
 
 ---
 
 ## 매크로 상수의 성격
-`stm32f10x_rcc.h`에는 C 열거형(enum)은 정의되어 있지 않으며,
-대신 **매크로 상수(`#define`) 형태로 모든 설정 값이 제공**된다.
+`stm32f10x_rcc.h`에는 **매크로 상수(`#define`) 형태로 모든 설정 값이 제공**된다.
 
 예를 들어 HSE 설정은 다음과 같이 정의된다.
 
@@ -68,12 +67,27 @@ typedef struct
 
 ### 1) 시스템 클럭 소스 제어
 - HSI, HSE, PLL 설정 및 활성화
+- **HSI(High Speed Internal)**
+> MCU 내부에 내장된 고속 RC 오실레이터이다.
+> 외부 부품 없이 동작하며, 정확도는 HSE보다 낮다.
+- **HSE(High Speed External)**
+> 외부 크리스털 또는 외부 클럭 입력을 사용하는 고속 클럭 소스이다.
+> 내부 클럭 대비 정확도가 높아, 시스템 기준 클럭으로 사용될 수 있다.
+- **PLL(Phase-Locked Loop)**
+> 입력 클럭을 기준으로 주파수를 배수/분주하여 원하는 시스템 클럭을 생성하는 회로이다.
+> HSI 또는 HSE를 입력으로 받아 시스템 클럭을 만든다.
 - 시스템 클럭(SYSCLK) 소스 선택
 
 ### 2) 버스 클럭 분주
-- AHB(HCLK)
-- APB1(PCLK1)
-- APB2(PCLK2)
+- AHB(Advanced High-performance Bus)
+> CPU, DMA, 메모리와 연결되는 고속 시스템 버스이다.
+> 코어와 가장 가까운 상위 버스 역할을 한다. 
+- APB1(Advanced Peripheral Bus 1)
+> 저속 주변장치들이 연결되는 저속 주변장치 버스이다.
+> AHB에서 분주된 클럭을 사용한다.
+- APB2(Advanced Peripheral Bus 2)
+> 상대적으로 고속 주변장치들이 연결되는 주변장치 버스이다.
+> APB1과 분리된 클럭 도메인을 가진다.
 
 각 버스에 공급되는 클럭의 분주 비율을 설정한다.
 
@@ -94,10 +108,10 @@ typedef struct
 
 ### 5) 특수 클럭 설정
 - ADC 클럭
-- USB 클럭
-- RTC 클럭
-- LSE / LSI 설정
-- MCO 출력 설정
+- USB(Universal Serial Bus) 클럭
+- RTC(Real-Time Clock) 클럭
+- LSE(Low Speed External) / LSI(Low Speed Internal) 설정
+- MCO(Microcontroller Clock Output) 출력 설정
 
 ---
 
