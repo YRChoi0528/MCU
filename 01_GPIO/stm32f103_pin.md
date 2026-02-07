@@ -37,7 +37,7 @@ BOOT0 / BOOT1 : 부트 모드 선택
 - 기본적으로 범용 입출력
 - 설정에 따라 주변장치 기능으로 다중화(Multiplexing) 됨
 - 예:
-- - PA9 → USART1_TX
+  - PA9 → USART1_TX
   - PB6 → I2C1_SCL
   - PA5 → SPI1_SCK
 
