@@ -107,7 +107,15 @@ GPIO 속도 설정은 클럭 주파수가 아니다.
 - 전력 소모, 전자기장 간섭(Electromagnetic Interference, EMI) 증가 가능
 
 아래 이미지는 GPIO Speed 설정이 핀의 전기적 출력 특성에 미치는 영향을 보여준다. 
-![GPIO Speed=2MHz](../images/2MHz.png) | ![GPIO Speed=2MHz](../images/50MHz.png)
+
+![GPIO Speed=2MHz](../images/2MHz.png)
+![GPIO Speed=50MHz](../images/50MHz.png)
+
+|GPIO Speed|Rise Time|특성 및 비유|
+|----------|---------|------------|
+|2MHz|약 9.5ns|신호의 기울기가 완만함. 전력 소모와 노이즈가 적어 저속 제어에 유리.|
+|50MHz|약 2.4ns|신호가 매우 가파르게 상승함. 고속 통신에 필수적이나 전력 소모와 노이즈가 증가함.|
+
 `출처: https://github.com/hampussandberg/HexConnect/wiki/STM32-GPIO-Speed`
 ---
 
