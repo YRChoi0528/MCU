@@ -93,6 +93,7 @@ Pull-Up / Pull-Down 입력은:
 ## 6. **General Purpose** vs **Alternate Function**
 General Purpose(GPIO) 모드는:
 - 소프트웨어가 직접 핀의 상태를 제어
+
 Alternate Function(AF) 모드는:
 - 핀이 주변장치(UART, SPI, TIMER 등)의 신호선으로 동작
 > 즉, AF 모드는 GPIO가 "사라지는 것"이 아니라 **GPIO 제어권을 주변장치가 가져가는 것**이다.
