@@ -42,27 +42,27 @@ GPIO는 설정에 따라 크게 다음과 같은 모드로 나뉜다.
 ## 4. 출력(Output) 모드의 전기적 의미
 출력 모드는 MCU가 **외부 회로를 구동**하는 경우에 해당한다.
 이때 중요한 것은 "논리 1/0"이 아니라 **어떻게 전압을 만들어내는가**이다.
-### 4.1 Push-Pull
-Push-Pull 출력은:
-- 상단 트랜지스터 → High 구동
-- 하단 트랜지스터 → Low 구동
-을 모두 내부에서 직접 수행한다.
 
-특징:
-- 빠른 전환 속도
-- 강한 구동 능력
-- 명확한 High/Low 레벨
-- 일반적인 LED 제어, 단일 신호 출력에 적합하다.
+![(좌) Push-Pull , (우) Open-Drain](../images/Push_Pull_Open_Drain.png)
+
+### 4.1 Push-Pull
+왼쪽 그림과 같이 상단의 PMOS와 하단의 NMOS가 한 쌍으로 구성되어, </br>
+전압을 능동적으로 밀고(Push) 당기는(Pull) 구조이다.
+- **Internal Siganal에 따른 변화**:
+  - **Signal = LOW**: 상단의 **PMOS가 ON**되고 하단의 NMOS가 OFF된다. </br> 이때 VDD의 전원이 `Output pin`으로 연결되어 전류를 **밀어내며(Push)** 출력은 **HIGH**가 된다.
+  - **Signal = HIGH**: 상단의 PMOS가 OFF되고 하단의 **NMOS가 ON**된다. </br> 이때 `Output pin`이 GND와 연결되어 전류를 **잡아당기며(Pull)** 출력은 **LOW**가 된다.
+- 특징 : 외부 장치 없이도 스스로 HIGH와 LOW를 모두 출력할 수 있어 신호 전환이 빠르고 강력하다.
 ---
 ### 4.2 Open-Drain
-Open-Drain 출력은:
-- Low만 능동적으로 구동
-- High는 외부 풀업 저항에 의존
-하는 구조다.
-
-특징:
-- 여러 장치가 하나의 선을 공유 가능
-- 충돌 시에도 물리적 손상이 적음
+오른쪽 그림과 같이 상단의 PMOS가 존재하지 않고(또는 사용되지 않고) 하단의 **NMOS만 존재**하는 구조이다.
+- **Internal Signal에 따른 변화**:
+  - **Signal = LOW**: NMOS가 OFF된다.이때 `Output pin`은 내부적으로 어디에도 연결되지 않은 **Floating** 상태가 되며, </br> 오직 **External Pull-up Resistor**에 의해 전압이 VDD 레벨로 유지된다.
+  - **Signal = HIGH**: **NMOS가 ON**되어 `Output pin`을 GND로 연결한다. 따라서 출력은 **LOW**가 된다.
+- 특징 : LOW는 스스로 만들 수 있지만, HIGH를 만들려면 반드지 외부 저항이 필요하다.
+- **External Pull-up Resistor(외부 풀업 저항)의 역할과 변화**
+- Open-Drain 모드에서 외부 풀업 저항은 출력의 성격을 결정짓는 요소이다.
+  - **HIGH 상태 결정** : NMOS가 꺼졌을 때 전류가 저항을 타고 흘러 `Output pin`의 전압을 올려준다. </br> 저항값이 작으면(강한 풀업) 전압이 빠르게 올라가 통신 속도에 유리하지만 전력 소모가 크다.
+  - **Wired-AND 구현**: 여러개의 Open-Drain 핀을 하나의 풀업 저항에 공통으로 연결하면, </br> 어느 한 핀이라도 NMOS를 켜서(LOW) 신호를 당기면 전체 선이 LOW가 되는 논리 회로를 구성할 수 있다.
 
 ---
 
