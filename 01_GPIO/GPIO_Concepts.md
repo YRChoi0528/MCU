@@ -41,6 +41,8 @@ GPIO는 설정에 따라 크게 다음과 같은 모드로 나뉜다.
 
 ---
 
+![표준 I/O 포트 비트의 기본 구조](../images/Basic_Structure_of_a_Standard_IO_Port_Bit.png)
+
 ## 4. 출력(Output) 모드의 전기적 의미
 출력 모드는 MCU가 **외부 회로를 구동**하는 경우에 해당한다.
 이때 중요한 것은 "논리 1/0"이 아니라 **어떻게 전압을 만들어내는가**이다.
@@ -69,35 +71,55 @@ GPIO는 설정에 따라 크게 다음과 같은 모드로 나뉜다.
 ---
 
 ## 5. 입력(Input) 모드의 전기적 의미
-입력 모드는 외부 신호를 MCU 내부로 읽어들이는 경우다.
-이때 가장 중요한 개념은 입력 핀이 떠 있는지 여부다.
+입력 모드는 외부 신호를 MCU 내부로 읽어들이는 방식에 따라 크게 4가지로 나뉜다.
+공통 특징으로는 Output Driver가 비활성화 된다.
 
-### 5.1 Floating Input
-Floating 입력은:
-- 내부적으로 어떠한 기준 전압도 연결되지 않은 상태
+### 5.1 AIN(Analog Input)
+핀에 인가된 전압을 디지털(0 또는 1)로 변환하지 않고, 있는 그대로 ADC 주변장치로 전달하는 모드이다.
+- **동작원리**: 전력 소모를 줄이고 디지털 노이즈 간섭을 막기 위해 **Input Driver의 Pull-Up/Pull-Down 저항** 그리고 **슈미트 트리거(Schmitt Trigger)**를 비활성화한다.
+- **특징**:
+  - 외부의 미세한 전압 변화를 측정할 때 사용한다.
+  - **입력 데이터 레지스터(IDR, Input Data Register)**를 통해 값을 읽을 수 없으며, 반드시 ADC 주변장치를 거쳐야 한다.
+
+### 5.2 Floating Input
+Input Driver의 Pull-Up/Pull-Down 저항을 모두 비활성화 하고 핀을 공중에 띄워둔(Floating) 상태이다.
+- **동작원리**: 외부 회로에서 오는 신호를 그대로 슈미트 트리거를 거쳐 **IDR**로 전달한다.
+- **특징**:
+  - 외부 신호가 연결되지 않으면 전위가 불안정하여 노이즈에 매우 취약하다.
+  - 외부에 명확한 Pull-Up/Pull-Down 회로가 이미 구성되어 있는 경우(예: 버튼 회로)에 주로 사용한다.
   
-특징:
-- 외부가 연결되지 않으면 값이 불안정
-- 노이즈에 매우 민감
 ---
-### 5.2 Pull-Up / Pull-Down
-Pull-Up / Pull-Down 입력은:
-- 내부 저항을 통해 High 또는 Low 기준을 제공
-  
-목적:
-- 입력 상태 안정화
-- 미연결 상태에서의 오동작 방지
+### 5.3 Pull-Up / Pull-Down
+Input Driver의 Pull-Up/Pull-Down 저항을 사용하여 핀의 기본 전압 상태를 강제로 HIGH 또는 LOW로 고정하는 모드이다.
+- **동작원리**:
+  - **Pull-Up** : 내부 저항을 VDD에 연결하여 외부 입력이 없을 때 **1**로 읽히게 한다.
+  - **Pull-Down** : 내부 저항을 VSS에 연결하여 외부 입력이 없을 때 **0**으로 읽히게 한다.
+- **특징**:
+  - 신호가 끊겼을 때의 오동작을 방지하여 입력 상태를 안정화한다.
+  - 스위치 입력을 받을 때 별도의 외부 저항 없이도 간단하게 회로를 구성할 수 있다.
 
 ---
 
-## 6. **General Purpose** vs **Alternate Function**
-General Purpose(GPIO) 모드는:
-- 소프트웨어가 직접 핀의 상태를 제어
+## 6. **General Purpose Output** vs **Alternate Function Output**
+### 1. 범용 출력 (General Purpose Output)
+이 모드는 CPU가 메모리에 데이터를 쓰듯이, 특정 레지스터의 비트 값을 핀으로 밀어내는 방식이다.
+- **동작 원리** : CPU가 코드를 통해 출력 데이터 레지스터(`Output Data Register, ODR`)에 '0'또는 '1'을 쓴다. </br> 이 레지스터의 비트 상태가 `Output Control` 블록을 거쳐 핀의 전기적 신호(전압)로 변환된다.
+- **특징** : 신호의 변화 시점이 프로그램의 실행속도에 종속된다.
+- **핵심** : 핀의 상태는 **레지스터의 비트값과 1:1로 매칭**된다.
+    
+### 2. 대체 기능 출력 (Alternate Function Output)
+이 모드는 `Output Data Register`를 거치지 않고, **주변장치(Timer, UART 등)의 신호선이 핀의 제어로직에 직접 연결되는 방식이다.**
+- **동작 원리** : `Output Control` 블록이 `Output Data Register` 대신 **`Alternate Function Output`** 이라는 별도의 신호선을 선택한다. </br> 타이머나 통신 모듈 내부에서 생성된 디지털 신호가 이 전용 통로를 타고 출력 드라이버로 바로 전달된다.
+- **특징** : 신호의 변화가 CPU의 개입 없이 하드웨어 로직에 의해 발생하므로, 통신 규격에 맞는 정밀한 타이밍이나 초고속 신호 생성이 가능하다.
+- **핵심** : 핀의 상태는 **주변장치 내부 하드웨어 엔진의 상태**를 실시간으로 반영한다.
 
-Alternate Function(AF) 모드는:
-- 핀이 주변장치(UART, SPI, TIMER 등)의 신호선으로 동작
-> 즉, AF 모드는 GPIO가 "사라지는 것"이 아니라 **GPIO 제어권을 주변장치가 가져가는 것**이다.
-
+### 3. 요약
+|구분|범용 출력(General Purpose Output)|대체 기능 출력(Alternate Function Output)|
+|----|---------------------------------|-----------------------------------------|
+|신호의 출발점|Output Data Register(ODR)|Internal Peripheral(Timer, UART 등)|
+|데이터 경로|CPU→ODR→Output Control→Pin|Peripheral→AF Output→Output Control→Pin|
+|제어 단위|코드 실행 단위|하드웨어 클럭 단위(매우 정밀함)|
+|사용 예시|단순 ON/OFF 제어, 상태 표시 LED|PWM, 직렬 통신 데이터 전송|
 ---
 
 ## 7. GPIO 속도(2MHz/10MHz/50MHz)의 의미
