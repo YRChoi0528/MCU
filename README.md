@@ -15,6 +15,7 @@
 ### 2.1 사용 환경
 
 - **MCU 키트**: HBE-MCU-Multi (한백전자)
+- **디바이스 패키지**: STM32F103RBT6
 - **개발 언어**: C
 - **개발 환경**: IAR Embedded Workbench
 
