@@ -59,10 +59,10 @@ GPIO는 설정에 따라 크게 다음과 같은 모드로 나뉜다.
   - **Signal = LOW**: NMOS가 OFF된다.이때 `Output pin`은 내부적으로 어디에도 연결되지 않은 **Floating** 상태가 되며, </br> 오직 **External Pull-up Resistor**에 의해 전압이 VDD 레벨로 유지된다.
   - **Signal = HIGH**: **NMOS가 ON**되어 `Output pin`을 GND로 연결한다. 따라서 출력은 **LOW**가 된다.
 - 특징 : LOW는 스스로 만들 수 있지만, HIGH를 만들려면 반드지 외부 저항이 필요하다.
-- **External Pull-up Resistor(외부 풀업 저항)의 역할과 변화**
-- Open-Drain 모드에서 외부 풀업 저항은 출력의 성격을 결정짓는 요소이다.
-  - **HIGH 상태 결정** : NMOS가 꺼졌을 때 전류가 저항을 타고 흘러 `Output pin`의 전압을 올려준다. </br> 저항값이 작으면(강한 풀업) 전압이 빠르게 올라가 통신 속도에 유리하지만 전력 소모가 크다.
-  - **Wired-AND 구현**: 여러개의 Open-Drain 핀을 하나의 풀업 저항에 공통으로 연결하면, </br> 어느 한 핀이라도 NMOS를 켜서(LOW) 신호를 당기면 전체 선이 LOW가 되는 논리 회로를 구성할 수 있다.
+> **External Pull-up Resistor(외부 풀업 저항)의 역할과 변화**
+> - Open-Drain 모드에서 외부 풀업 저항은 출력의 성격을 결정짓는 요소이다.
+  > - **HIGH 상태 결정** : NMOS가 꺼졌을 때 전류가 저항을 타고 흘러 `Output pin`의 전압을 올려준다. </br> 저항값이 작으면(강한 풀업) 전압이 빠르게 올라가 통신 속도에 유리하지만 전력 소모가 크다.
+  > - **Wired-AND 구현**: 여러개의 Open-Drain 핀을 하나의 풀업 저항에 공통으로 연결하면, </br> 어느 한 핀이라도 NMOS를 켜서(LOW) 신호를 당기면 전체 선이 LOW가 되는 논리 회로를 구성할 수 있다.
 
 ---
 
