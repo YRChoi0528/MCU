@@ -98,7 +98,7 @@ void RCC_APB2PeriphClockCmd(u32 RCC_APB2Periph, FunctionalState NewState)
 ---
 
 ## 3. CRL / CRH : GPIO 모드 설정 레지스터
-![GPIOx CRL/CRH Resister](../images/GPIOx_CRL_CRH_Resister.png)
+![GPIOx CRL/CRH Resister](../images/GPIOx_CRL_CRH_Register.png)
 ### 3.1 핀당 4비트 구조
 - 각 핀은 **4비트(CNF[1:0], MODE[1:0])**로 설정
 - CRL : 핀 0~7
