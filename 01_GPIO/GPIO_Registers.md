@@ -37,7 +37,7 @@ RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
 - GPIOA 레지스터에 접근 가능하도록 **APB2 버스 클럭을 공급**
 - 해당 코드가 없으면 CRL/CRH 설정은 무시됨
 
-아래 코드들은 `RCC_APB2PeriphClockCmd()` 함수가 어떤 정의와 로직을 거쳐 **최종적으로 레지스터를 수정**하게 되는지 그 흐름을 추적해 보았다.
+아래 코드들은 `RCC_APB2PeriphClockCmd()` 함수가 어떤 정의와 로직을 거쳐 **최종적으로 레지스터를 어떻게 수정**하게 되는지 그 흐름을 추적해 보았다.
 
 ```c
 // conf.h
