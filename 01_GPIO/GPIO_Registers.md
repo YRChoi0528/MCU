@@ -368,3 +368,128 @@ GPIO_Init(GPIOA, &GPIO_InitStructure);
 - MODE=11 (50MHz)
 - CNF=00 (Push-Pull)
 → **PA0~PA7**이 고속(50MHz) **Push-Pull** 출력으로 설정됨
+
+---
+
+## 10. GPIO 제어 함수
+
+`gpio.c` 라이브러리에서 제공하는 함수들은 크게 **출력(Write)**과 **입력(Read)**으로 나뉜다. 
+
+### 10.1 출력 함수
+핀에 전압을 인가하거나 차단하여 외부 장치를 구동할 때 사용
+- GPIO_SetBits(GPIO_TypeDef* GPIOx, u16 GPIO_Pin)
+```c
+void GPIO_SetBits(GPIO_TypeDef* GPIOx, u16 GPIO_Pin)
+{
+  /* Check the parameters */
+  assert_param(IS_GPIO_PIN(GPIO_Pin));
+  GPIOx->BSRR = GPIO_Pin;
+}
+```
+  - 지정한 핀의 출력을 **High(1)**로 설정
+  - BSRR의 해당 비트에 '1'을 기록하여 핀을 Set
+  
+- GPIO_ResetBits(GPIO_TypeDef* GPIOx, u16 GPIO_Pin)
+```c
+void GPIO_ResetBits(GPIO_TypeDef* GPIOx, u16 GPIO_Pin)
+{
+  assert_param(IS_GPIO_PIN(GPIO_Pin));
+  GPIOx->BRR = GPIO_Pin;
+}
+```
+  - 지정한 핀의 출력을 **Low(0)**로 설정
+  - BRR의 해당 비트에 '1'을 기록하여 핀을 Reset
+  
+- GPIO_WriteBit(GPIO_TypeDef* GPIOx, u16 GPIO_Pin, BitAction BitVal)
+```c
+void GPIO_WriteBit(GPIO_TypeDef* GPIOx, u16 GPIO_Pin, BitAction BitVal)
+{
+  assert_param(IS_GET_GPIO_PIN(GPIO_Pin));
+  assert_param(IS_GPIO_BIT_ACTION(BitVal)); 
+  
+  if (BitVal != Bit_RESET)
+  {
+    GPIOx->BSRR = GPIO_Pin;
+  }
+  else
+  {
+    GPIOx->BRR = GPIO_Pin;
+  }
+}
+```
+  - 특정 핀 하나에 원하는 값(`Bit_SET` 또는 `Bit RESET`)을 기록
+  - 매개변수 `BitVal`의 값에 따라 내부적으로 `GPIO_SetBits()` 또는 `GPIO_ResetBits()`와 같은 동작을 선택적으로 호출
+
+- GPIO_Write(GPIO_TypeDef* GPIOx, u16 PortVal)
+```c
+void GPIO_Write(GPIO_TypeDef* GPIOx, u16 PortVal)
+{
+  GPIOx->ODR = PortVal;
+}
+```
+  - 해당 포트의 16개 핀 상태를 동시에 제어
+  - 기존의 상태와 무관하게 **ODR** 전체에 `PortVal` 값을 직접 덮어 씌움
+
+### 10.2 입력 및 상태 읽기 함수
+외부 신호를 감지하거나 현재 출력 설정 상태를 확인할 때 사용
+- GPIO_ReadInputDataBit(GPIO_TypeDef* GPIOx, u16 GPIO_Pin)
+```c
+u8 GPIO_ReadInputDataBit(GPIO_TypeDef* GPIOx, u16 GPIO_Pin)
+{
+  u8 bitstatus = 0x00;
+  
+  assert_param(IS_GET_GPIO_PIN(GPIO_Pin)); 
+  
+  if ((GPIOx->IDR & GPIO_Pin) != (u32)Bit_RESET)
+  {
+    bitstatus = (u8)Bit_SET;
+  }
+  else
+  {
+    bitstatus = (u8)Bit_RESET;
+  }
+  return bitstatus;
+}
+```
+  - 특정 핀에 인가된 실제 물리적인 전압 상태를 읽음 
+  - **IDR** 레지스터의 해당 비트 값을 반환
+  
+- GPIO_ReadInputData(GPIO_TypeDef* GPIOx)
+```c
+u16 GPIO_ReadInputData(GPIO_TypeDef* GPIOx)
+{
+  return ((u16)GPIOx->IDR);
+}
+```
+  - 해당 포트 전체(16비트)의 입력 상태를 한 번에 읽음
+   
+- GPIO_ReadOutputDataBit(GPIO_TypeDef* GPIOx, u16 GPIO_Pin)
+```c
+u8 GPIO_ReadOutputDataBit(GPIO_TypeDef* GPIOx, u16 GPIO_Pin)
+{
+  u8 bitstatus = 0x00;
+
+  assert_param(IS_GET_GPIO_PIN(GPIO_Pin)); 
+  
+  if ((GPIOx->ODR & GPIO_Pin) != (u32)Bit_RESET)
+  {
+    bitstatus = (u8)Bit_SET;
+  }
+  else
+  {
+    bitstatus = (u8)Bit_RESET;
+  }
+  return bitstatus;
+}
+```
+  - 사용자가 마지막으로 출력하도록 설정한(ODR에 쓴) 값을 확인
+  - 핀의 실제 전압이 아닌, 내부 **ODR**의 기록된 값을 읽음
+
+- GPIO_ReadOutputData(GPIO_TypeDef* GPIOx)
+```c
+u16 GPIO_ReadOutputData(GPIO_TypeDef* GPIOx)
+{
+  return ((u16)GPIOx->ODR);
+}
+```
+  - 해당 포트 전체의 마지막 출력 설정 상태를 읽음
