@@ -74,41 +74,29 @@ Update Event는 **카운터의 한 사이클이 종료되는 시점**을 알리�
 
 ---
 
-## 5. Output Compare(OC): “특정 카운트 시점에 동작”
-Output Compare는 “CNT가 특정 값(CCR)에 도달할 때” 동작을 만든다.
+## 5. Output Compare(OC)와 Pulse Width Modulation(PWM)
+Output Compare는 **타이머의 카운터(`CNT`) 값**과 사용자가 설정한 **비교 레지스터(`CCR`) 값**을 실시간으로 비교하여 특정 동작을 수행하는 기능이다.
 
-- **CCR1~CCR4**: 비교 기준 값
-- **OC Mode**: 비교 일치 시 출력 동작(토글/강제 High/Low 등) 정의
+- **CCR(Capture/Compare Register)** : 출력 상태를 바꿀 **문턱값** 역할을 한다.
+- **OC Mode** : `CNT`와 `CCR`이 일치하는 순간, 출력 핀을 어떻게 만들지(High/Low/Toggle/PWM) 결정한다.
 
-예)
-- CNT==CCR1이면 GPIO 토글 → 일정 주파수의 토글 신호 생성
-- CNT==CCR2이면 특정 타이밍에 펄스 생성
-
-OC는 “정확한 타이밍”을 하드웨어가 보장한다는 점에서 유용하다.
-
+PWM은 아래 비교 기능을 반복하여 일정한 주기를 가진 펄스를 만드는 것이다.
+  1. 주기 설정(ARR) : 카운터가 0부터 다시 시작하는 지점을 정하여 전체 **주기**를 결정한다.
+  2. 듀티 설정(CCR) : 한 주기 내에서 신호가 뒤집히는 **스위칭 시점**을 결정한다.
+  3. 출력 로직 (Up-count 시):
+     - `CNT < CCR` 구간 : 신호 활성화 (주로 High)
+     - `CNT ≥ CCR` 구간 : 신호 비활성화 (주로 Low)
+       
 ---
 
-## 6. PWM: 주기(ARR) + 듀티(CCR)로 파형 만들기
-PWM(Pulse Width Modulation)은 “주기 대비 High 시간 비율(듀티)”을 조절하는 파형이다.
+## 6. PWM의 수식 및 활용
+PWM의 성능은 얼마나 정밀하게 주기와 듀티를 쪼갤 수 있느냐에 달려 있다.
 
-- **주기(Period)**: ARR로 결정
-- **듀티(Duty)**: CCR로 결정
+- **PWM 주파수**($f_PWM$) : 타이머 전체 주기와 동일
+$f_PWM=f_TIM\over (PSC+1) × (ARR+1)$
 
-업카운트 + PWM1 모드(대표적인 구성)의 직관은 다음과 같다.
-
-- CNT가 0에서 시작하여 증가
-- CNT < CCR 일 때 출력 High, CNT ≥ CCR 일 때 Low (혹은 반대, 폴라리티에 따라)
-
-따라서,
-- 듀티비: `Duty = CCR / (ARR+1)` (해석 관점에 따라 +1 처리 차이는 있음)
-- PWM 주파수: `f_PWM = f_TIM / ((PSC+1)*(ARR+1))`
-
-PWM은 대표적으로
-- 모터 속도 제어
-- LED 밝기 제어
-- 스위칭 전원, 신호 생성
-등에 활용된다.
-
+- **듀티비(Duty Cycle)** : 한 주기$(ARR+1)$ 중 CCR이 차지하는 비율
+&Duty(%) = CCR\over ARR+1 × 100&
 ---
 
 ## 7. Input Capture(IC): “외부 입력의 시간/주기 측정”
