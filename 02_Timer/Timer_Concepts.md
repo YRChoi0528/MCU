@@ -92,13 +92,13 @@ PWM은 아래 비교 기능을 반복하여 일정한 주기를 가진 펄스를
 ## 6. PWM의 수식 및 활용
 PWM의 성능은 얼마나 정밀하게 주기와 듀티를 쪼갤 수 있느냐에 달려 있다.
 
-- **PWM 주파수**($f_PWM$) : 타이머 전체 주기와 동일
+- **PWM 주파수**($f_{PWM}$) : 타이머 전체 주기와 동일
 
-$f_PWM=f_TIM\over (PSC+1) × (ARR+1)$
+$f_{PWM}={f_{TIM}}\over {(PSC+1) × (ARR+1)}$
 
 - **듀티비(Duty Cycle)** : 한 주기$(ARR+1)$ 중 CCR이 차지하는 비율
 
-$Duty(%) = CCR\over ARR+1 × 100$
+$Duty(%) = {CCR\over ARR+1} × 100$
 ---
 
 ## 7. Input Capture(IC): “외부 입력의 시간/주기 측정”
