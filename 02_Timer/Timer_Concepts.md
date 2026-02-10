@@ -109,7 +109,7 @@ $$f_{PWM} = \frac{f_{TIM}}{(PSC + 1) \times (ARR + 1)}$$
 
 - **듀티비(Duty Cycle) 계산** : 한 주기($ARR+1$) 중 CCR이 차지하는 비율
 
-$$Duty\text{(\%)} = \frac{CCR}{ARR + 1} \times 100$$
+$$\text{Duty (\%)} = \frac{CCR}{ARR + 1} \times 100$$
 
 ---
 
