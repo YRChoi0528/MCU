@@ -112,7 +112,7 @@ Time-Base Unit은 타이머의 가장 기본이 되는 '시간 생성' 역할을
 - 출력 비교 :
 - 입력 캡처 :
 |
-|Bit[0]|UIF|
+|Bit[0]|UIF||
 
 ### 4.3 TIMx_EGR(Event Generation Register)
 소프트웨어적으로 이벤트를 강제 발생시켜 레지스터 값을 즉시 업데이트한다.
