@@ -109,11 +109,11 @@ $$f_{PWM} = \frac{f_{TIM}}{(PSC + 1) \times (ARR + 1)}$$
 
 - **듀티비(Duty Cycle) 계산** : 한 주기($ARR+1$) 중 CCR이 차지하는 비율
 
-$$Duty(\%) = \frac{CCR}{ARR + 1} \times 100$$
+$$Duty = \frac{CCR}{ARR + 1} \times 100$$
 
 ---
 
-## 7. Input Capture(IC): “외부 입력의 시간/주기 측정”
+## 7. Input Capture(IC): 외부 입력의 시간/주기 측정
 Input Capture는 외부 입력 핀의 에지(상승/하강)가 들어오는 순간의 CNT 값을 CCR에 **캡처**한다.
 
 - 예) 상승 에지마다 CCR1에 CNT 저장
