@@ -289,7 +289,7 @@ void TIM_Cmd(TIM_TypeDef* TIMx, FunctionalState NewState)
 - PWM의 듀티비(Duty Cycle)를 결정하는 임계값(Threshold)이다.
 - 하드웨어가 실시간으로 `CNT`와 `CCRx`를 비교하며, 설정된 모드(`OCxM`)에 따라 출력 핀의 상태를 바꾼다.
 
-### 5.4 `TIM_OCxInit()`함수와 레지스터 매핑
+### 5.4 `TIM_OCInit()`함수와 레지스터 매핑
 
 ```c
 TIM_OCInitStructure.TIM_OCMode     = TIM_OCMode_PWM1;      // 0x0060
