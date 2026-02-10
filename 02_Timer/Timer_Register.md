@@ -311,24 +311,12 @@ typedef struct
 #define TIM_Channel_1                     ((u16)0x0000)
 #define TIM_OCPolarity_High               ((u16)0x0000)
 
-// tim.c
-void TIM_OCInit(TIM_TypeDef* TIMx, TIM_OCInitTypeDef* TIM_OCInitStruct)
-{
-  /* 공통 준비(변수/검사/CCER 백업) */
-  /* 채널 그룹 선택(CCMR1: CH1/2, CCMR2: CH3/4) */
-  /* 그룹 공통 초기화(OC 모드/폴라리티 필드 클리어) */
-  /* 채널별 설정(Disable → 모드 → CCRx → Enable/Polarity) */
-  /* CCMR 반영 */
-  /* CCER 최종 반영 */
-}
-```
-
-#### 5.4.1 공통 준비(변수/검사/CCER 백업)
 ```c
 /*
-tmpccmrx : CCMR1 또는 CCMR2를 조작하기 위한 임시 값
-tmpccer : CCER을 조작하기 위한 임시값
-*/
+ * (1) 공통 준비(변수/검사/CCER 백업)
+ * tmpccmrx : CCMR1 또는 CCMR2를 조작하기 위한 임시 값
+ * tmpccer : CCER을 조작하기 위한 임시값
+ */
 u32 tmpccmrx = 0, tmpccer = 0;
 
 /* 파라미터 검사 */
@@ -340,20 +328,20 @@ assert_param(IS_TIM_OC_POLARITY(TIM_OCInitStruct->TIM_OCPolarity));
 tmpccer = TIMx->CCER;
 ```
 
-#### 5.4.2 채널 그룹 선택(CCMR1: CH1/2, CCMR2: CH3/4) 및 그룹 공통 초기화(OC Mode/Polarity Field Clear)
 ```c
-/* TIM_OCInitStructure->TIM_Channel 에는 TIM_Channel_1 이 저장되어 있다. */
+/*
+ * (2) 채널 그룹 선택(CCMR1: CH1/2, CCMR2: CH3/4)
+ * TIM_OCInitStructure->TIM_Channel 에는 TIM_Channel_1 이 저장되어 있다.
+ * 채널 그룹 선택(CCMR1: CH1/2, CCMR2: CH3/4)
+ * tmpccmrx = TIMx->CCMR1; → 채널 1을 설정할 수 있는 CCMR1 선택
+ */
 if ((TIM_OCInitStruct->TIM_Channel == (u16)TIM_Channel_1) ||
     (TIM_OCInitStruct->TIM_Channel == (u16)TIM_Channel_2))
 {
-  /*
-   * 채널 그룹 선택(CCMR1: CH1/2, CCMR2: CH3/4)
-   * 채널 1을 설정할 수 있는 CCMR1 선택
-   */
   tmpccmrx = TIMx->CCMR1;
 
   /*
-   * 그룹 공통 초기화(OC Mode/Polarity Field Clear)
+   * (3) 그룹 공통 초기화(OC Mode/Polarity Field Clear)
    * #define CCER_CC1P_Mask              ((u16)0x3331)
    * #define CCER_CC2P_Mask              ((u16)0x3313)
    * #define CCER_CC3P_Mask              ((u16)0x3133)
@@ -370,7 +358,7 @@ if ((TIM_OCInitStruct->TIM_Channel == (u16)TIM_Channel_1) ||
   tmpccer &= Tab_PolarityMask[TIM_OCInitStruct->TIM_Channel];
 
   /*
-   * 채널별 설정(Disable → 모드 → CCRx → Enable/Polarity)
+   * (4) 채널별 설정(Disable → 모드 → CCRx → Enable/Polarity)
    * #define CCER_CC1E_Reset             ((u16)0x3332)
    * #define CCER_CC1E_Reset             ((u16)0x0001)
    * TIMx->CCER &= 0x3332; → CCER의 0번 비트(=CC1E)를 0으로 내려 설정 도중 출력이 흔들리는 것을 막는다.
@@ -394,7 +382,7 @@ if ((TIM_OCInitStruct->TIM_Channel == (u16)TIM_Channel_1) ||
   else {/* TIM_Channel_2 */}
 
   /*
-   * CCMR 반영
+   * (5) CCMR 반영
    * TIM3->CCMR1의 CH1 영역이 PWM1 모드로 바뀜
    */
   TIMx->CCMR1 = (u16)tmpccmrx;
@@ -402,7 +390,7 @@ if ((TIM_OCInitStruct->TIM_Channel == (u16)TIM_Channel_1) ||
 else{/* TIM_Channel_3 , TIM_Channel_4 */}
 
 /*
- * CCER 반영
+ * (6) CCER 반영
  * CH1 enable(CC1E=1)이 확정된다.
  * Polarity는 High(=0)이므로 CC1P는 기본(비반전) 방향으로 유지된다.
  */
