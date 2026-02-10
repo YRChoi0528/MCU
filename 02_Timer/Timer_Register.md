@@ -106,10 +106,10 @@ Time-Base Unit은 타이머의 가장 기본이 되는 '시간 생성' 역할을
 
 |비트|이름|설명|
 |----|----|----|
-|Bit[12:9]|CCxOF|Capture/Compare x Overcapture Flag. <br> 입력 캡처 모드에서만 사용. 이전 캡처 값을 읽기전에 새로운 캡처 이벤트가 발생하여 `CCxIF`가 이미 SET 된 상태에서 다시 데이터가 저장될 경우 SET 됨(데이터 손실 알림).|
-|Bit[6]|TIF|Trigger Interrupt Flag. <br> 설정된 트리거 입력 신호(외부 클럭, 내부 동기화 신호 등)가 감지되었을 때 하드웨어가 SET|
-|Bit[4:1]|CCxIF|Capture/Compare x Interrupt Flag. <br> - 출력 비교 : `CNT`값이 `CCRx`값과 일치할 때 SET <br> - 입력 캡처 : 설정된 에지가 감지되어 `CNT`값이 `CCRx`레지스터에 복사될 때 SET|
 |Bit[0]|UIF|Update Interrupt Flag. <br> 카운터가 ARR에 도달(오버플로우)하거나 0에 도달(언더플로우)하여 한 주기가 끝나는 업데이트 이벤트 발생 시 SET|
+|Bit[4:1]|CCxIF|Capture/Compare x Interrupt Flag. <br> - 출력 비교 : `CNT`값이 `CCRx`값과 일치할 때 SET <br> - 입력 캡처 : 설정된 에지가 감지되어 `CNT`값이 `CCRx`레지스터에 복사될 때 SET|
+|Bit[6]|TIF|Trigger Interrupt Flag. <br> 설정된 트리거 입력 신호(외부 클럭, 내부 동기화 신호 등)가 감지되었을 때 하드웨어가 SET|
+|Bit[12:9]|CCxOF|Capture/Compare x Overcapture Flag. <br> 입력 캡처 모드에서만 사용. 이전 캡처 값을 읽기전에 새로운 캡처 이벤트가 발생하여 `CCxIF`가 이미 SET 된 상태에서 다시 데이터가 저장될 경우 SET 됨(데이터 손실 알림).|
 
 ### 4.3 TIMx_EGR(Event Generation Register)
 소프트웨어 제어를 통해 하드웨어 이벤트를 강제로 발생시키는 레지스터이다. 비트 SET 후 하드웨어가 자동으로 클리어한다.
@@ -118,9 +118,9 @@ Time-Base Unit은 타이머의 가장 기본이 되는 '시간 생성' 역할을
 
 |비트|이름|설명|
 |----|----|----|
-|Bit[6]|TG|Trigger Generation. <br> 소프트웨어적으로 트리거 이벤트를 발생시킴. 연결된 다른 타이머나 주변장치에 시작 신호를 보낼 때 사용.|
-|Bit[4:1]|CCxG|Capture/Compare x Generation. <br> 물리적인 신호 입력이나 값 일치 없이도 각 채널의 비교/캡처 동작을 강제로 수행하게 함.|
 |Bit[0]|UG|Update Generation. <br> 업데이트 이벤트를 강제로 발생시켜 카운터를 초기화하고, PSC와 ARR의 설정값을 실제 연산 로직에 즉시 반영.|
+|Bit[4:1]|CCxG|Capture/Compare x Generation. <br> 물리적인 신호 입력이나 값 일치 없이도 각 채널의 비교/캡처 동작을 강제로 수행하게 함.|
+|Bit[6]|TG|Trigger Generation. <br> 소프트웨어적으로 트리거 이벤트를 발생시킴. 연결된 다른 타이머나 주변장치에 시작 신호를 보낼 때 사용.|
 
 ### 4.2 `TIM_TimeBaseInit()`함수와 레지스터 매핑
 ```c
@@ -266,7 +266,7 @@ void TIM_Cmd(TIM_TypeDef* TIMx, FunctionalState NewState)
 
 |비트|이름|설명|
 |----|----|----|
-|Bit[2:0], Bit[9:8]|CCxS|Capture/Compare x Selection. <br> 해당 채널을 출력(`00`)으로 쓸지 입력(`01/10/11`)으로 쓸지 결정|
+|Bit[1:0], Bit[9:8]|CCxS|Capture/Compare x Selection. <br> 해당 채널을 출력(`00`)으로 쓸지 입력(`01/10/11`)으로 쓸지 결정|
 |Bit[2], Bit[10]|OCxFE|Output Compare x fast enable. <br> `1` 설정 시 출력 신호의 응답 지연을 최소화함. 특정 이벤트 발생 시 하드웨어가 클럭 지연을 무시하고 출력을 트리거하여 응답 속도를 높임|
 |Bit[3], Bit[11]|OCxPE|Output Compare x Preload Enable. <br> `1` 설정 시 CCR 값 변경이 다음 Update Event 때 반영|
 |Bit[6:4], Bit[14:12]|OCxM|Output Compare x Mode. <br> 출력 형태를 결정하는 핵심 비트. <br> - `110`: PWM Mode 1 (CNT<CCR 시 Active) <br> - `111`: PWM Mode 2 (CNT<CCR 시 Inactive) <br> - `011`: Toggle (CNT=CCR 시 출력 반전)|
@@ -405,6 +405,8 @@ TIMx->CCER = (u16)tmpccer;
 ### 6.1 TIMx_CR2 (Control Register 2)
 주로 마스터 모드(Master Mode)에서 트리거 출력 신호(TRGO)를 관리하여 외부 장치나 다른 타이머로 이벤트를 전파함
 
+![TIMx_CR2](../images/TIMx_CR2.png)
+
 |비트|이름|설명|
 |----|----|----|
 |Bit[3]|CCDS|Capture/Compare DMA Selection. <br> `0` : CCx 이벤트 발생 시 DMA 요청을 보냄. <br> `1` : Update 이벤트 발생 시 DMA 요청을 보냄|
@@ -420,6 +422,8 @@ TIMx->CCER = (u16)tmpccer;
 
 ### 6.2 TIMx_SMCR (Slave Mode Control Register)
 외부 신호를 타이머의 클럭으로 사용하거나, 트리거 입력에 따른 자동 동작(Reset, Strat 등)을 설정
+
+![TIMx_SMCR](../images/TIMx_SMCR.png)
 
 |비트|이름|설명|
 |----|----|----|
@@ -440,6 +444,8 @@ TIMx->CCER = (u16)tmpccer;
 
 ### 6.3 TIMx_DIER (DMA/Interrupt Enable Register)
 타이머 내부에서 발생한 각 이벤트를 시스템 인터럽트나 DMA 요청으로 연결할지 결정.
+
+![TIMx_DIER](../images/TIMx_DIER.png)
 
 |비트|이름|설명|
 |----|----|----|
