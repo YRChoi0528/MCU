@@ -106,13 +106,10 @@ Time-Base Unit은 타이머의 가장 기본이 되는 '시간 생성' 역할을
 
 |비트|이름|설명|
 |----|----|----|
-|Bit[12:9]|CCxOF|Capture/Compare x Overcapture Flag. 입력 캡처 모드에서만 사용|
-|Bit[6]|TIF|Trigger Interrupt Flag. 설정된 트리거 입력 신호(외부 클럭, 내부 동기화 신호 등)가 감지되었을 때 하드웨어가 SET|
-|Bit[4:1]|CCxIF|Capture/Compare x Interrupt Flag. 
-- 출력 비교 :
-- 입력 캡처 :
-|
-|Bit[0]|UIF||
+|Bit[12:9]|CCxOF|Capture/Compare x Overcapture Flag. <br> 입력 캡처 모드에서만 사용. 이전 캡처 값을 읽기전에 새로운 캡처 이벤트가 발생하여 `CCxIF`가 이미 SET 된 상태에서 다시 데이터가 저장될 경우 SET 됨(데이터 손실 알림).|
+|Bit[6]|TIF|Trigger Interrupt Flag. <br> 설정된 트리거 입력 신호(외부 클럭, 내부 동기화 신호 등)가 감지되었을 때 하드웨어가 SET|
+|Bit[4:1]|CCxIF|Capture/Compare x Interrupt Flag. <br> - 출력 비교 : `CNT`값이 `CCRx`값과 일치할 때 SET <br> - 입력 캡처 : 설정된 에지가 감지되어 `CNT`값이 `CCRx`레지스터에 복사될 때 SET|
+|Bit[0]|UIF|Update Interrupt Flag. <br> 카운터가 ARR에 도달(오버플로우)하거나 0에 도달(언더플로우)하여 한 주기가 끝나는 업데이트 이벤트 발생 시 SET|
 
 ### 4.3 TIMx_EGR(Event Generation Register)
 소프트웨어적으로 이벤트를 강제 발생시켜 레지스터 값을 즉시 업데이트한다.
