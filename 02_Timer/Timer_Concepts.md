@@ -112,6 +112,7 @@ $$Duty(％) = \frac{CCR}{ARR + 1} \times 100$$
 ---
 
 ## 7. Input Capture(IC): 외부 입력의 시간/주기 측정
+
 Input Capture는 외부 입력 핀의 에지(상승/하강) 변화가 감지되는 순간, **CNT 값을 CCR에 즉시 복사(Capture)**하는 기능
 
 - 소프트웨어가 루프를 돌며 핀 상태를 확인(Polling)하는 것보다 훨씬 빠르고 정확한 시점의 시간을 기록
