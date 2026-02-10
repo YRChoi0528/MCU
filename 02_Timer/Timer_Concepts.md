@@ -77,32 +77,44 @@ Update Event는 **카운터의 한 사이클이 종료되는 시점**을 알리�
 ## 5. Output Compare(OC)와 Pulse Width Modulation(PWM)
 Output Compare는 **타이머의 카운터(`CNT`) 값**과 사용자가 설정한 **비교 레지스터(`CCR`) 값**을 실시간으로 비교하여 특정 동작을 수행하는 기능이다.
 
-- **CCR(Capture/Compare Register)** : 출력 상태를 바꿀 **문턱값** 역할을 한다.
+- **CCR(Capture/Compare Register)** : 출력 상태를 바꿀 **임계값** 역할을 한다.
 - **OC Mode** : `CNT`와 `CCR`이 일치하는 순간, 출력 핀을 어떻게 만들지(High/Low/Toggle/PWM) 결정한다.
 
 PWM은 아래 비교 기능을 반복하여 일정한 주기를 가진 펄스를 만드는 것이다.
   1. 주기 설정(ARR) : 카운터가 0부터 다시 시작하는 지점을 정하여 전체 **주기**를 결정한다.
   2. 듀티 설정(CCR) : 한 주기 내에서 신호가 뒤집히는 **스위칭 시점**을 결정한다.
   3. 출력 로직 (Up-count 시):
-     - `CNT < CCR` 구간 : 신호 활성화 (주로 High)
-     - `CNT ≥ CCR` 구간 : 신호 비활성화 (주로 Low)
-       
+     - `CNT < CCR` **구간(신호 활성화)** : 카운터가 시작되어 임계값(CCR)에 도달하기 전까지는 **Active(활성)** 상태를 유지한다.
+     - `CNT ≥ CCR` **구간(신호 비활성화)** : 카운터가 문턱값과 같아지거나 커지는 순간부터 주기(ARR)가 끝날 때까지는 Inactivate(비활성) 상태가 된다.
+
+![CCRx 값의 변화에 따른 출력 신호 변화(TIMx_ARR=8)](../images/CCR_ARR.png)
+
+PWM 동작은 아래 표와 같이 크게 두 가지 모드로 나뉜다.
+|구분|PWM Mode 1|PWM Mode 2|
+|----|----------|----------|
+|CNT < CCR|Active (주로 High)|Inactive (주로 Low)|
+|CNT ≥ CCR|Inactive (주로 Low)|Active (주로 High)|
+|특징|듀티비와 CCR 값이 비례|듀티비와 CCR 값이 반비례|
+
+> 위 PWM 동작 예시는 `TIM_OCPolarity_High`로 설정할 때이다. 만약 `TIM_OCPolarity_Low`로 설정하면 로직은 반대가 된다.
+
 ---
 
-## 6. PWM의 수식 및 활용
+## 6. PWM의 수식
 PWM의 성능은 얼마나 정밀하게 주기와 듀티를 쪼갤 수 있느냐에 달려 있다.
 
-- **PWM 주파수**($f_{PWM}$) : 타이머 전체 주기와 동일
+- **PWM 주파수 계산** : 타이머 전체 주기와 동일
 
-$f_{PWM}={f_{TIM}}\over {(PSC+1) × (ARR+1)}$
+$$f_{PWM} = \frac{f_{TIM}}{(PSC + 1) \times (ARR + 1)}$$
 
-- **듀티비(Duty Cycle)** : 한 주기$(ARR+1)$ 중 CCR이 차지하는 비율
+- **듀티비(Duty Cycle) 계산** : 한 주기($ARR+1$) 중 CCR이 차지하는 비율
 
-$Duty(%) = {CCR\over ARR+1} × 100$
+$$Duty(\%) = \frac{CCR}{ARR + 1} \times 100$$
+
 ---
 
 ## 7. Input Capture(IC): “외부 입력의 시간/주기 측정”
-Input Capture는 외부 입력 핀의 에지(상승/하강)가 들어오는 순간의 CNT 값을 CCR에 “캡처”한다.
+Input Capture는 외부 입력 핀의 에지(상승/하강)가 들어오는 순간의 CNT 값을 CCR에 **캡처**한다.
 
 - 예) 상승 에지마다 CCR1에 CNT 저장
 - 연속 두 번 캡처된 CNT 차이를 통해 **주기/주파수/펄스폭**을 계산 가능
