@@ -291,6 +291,124 @@ void TIM_Cmd(TIM_TypeDef* TIMx, FunctionalState NewState)
 
 ### 5.4 `TIM_OCxInit()`함수와 레지스터 매핑
 
+```c
+TIM_OCInitStructure.TIM_OCMode     = TIM_OCMode_PWM1;      // 0x0060
+TIM_OCInitStructure.TIM_Channel    = TIM_Channel_1;        // 0x0000
+TIM_OCInitStructure.TIM_Pulse      = CCR1_Val;             // CCR1에 들어갈 값 (이전에 변수로 선언되었다 가정)
+TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;  // 0x0000
+TIM_OCInit(TIM3, &TIM_OCInitStructure);
+
+// tim.h
+typedef struct
+{
+  u16 TIM_OCMode;          /* CCMR1/2 */
+  u16 TIM_Channel;         /* 레지스터 선택용 */
+  u16 TIM_Pulse;           /* CCR1~CCR4 중 TIM_Channel에 의해 결정 */
+  u16 TIM_OCPolarity;      /* CCER */
+} TIM_OCInitTypeDef;
+
+#define TIM_OCMode_PWM1                   ((u16)0x0060)
+#define TIM_Channel_1                     ((u16)0x0000)
+#define TIM_OCPolarity_High               ((u16)0x0000)
+
+// tim.c
+void TIM_OCInit(TIM_TypeDef* TIMx, TIM_OCInitTypeDef* TIM_OCInitStruct)
+{
+  /* 공통 준비(변수/검사/CCER 백업) */
+  /* 채널 그룹 선택(CCMR1: CH1/2, CCMR2: CH3/4) */
+  /* 그룹 공통 초기화(OC 모드/폴라리티 필드 클리어) */
+  /* 채널별 설정(Disable → 모드 → CCRx → Enable/Polarity) */
+  /* CCMR 반영 */
+  /* CCER 최종 반영 */
+}
+```
+
+#### 5.4.1 공통 준비(변수/검사/CCER 백업)
+```c
+/*
+tmpccmrx : CCMR1 또는 CCMR2를 조작하기 위한 임시 값
+tmpccer : CCER을 조작하기 위한 임시값
+*/
+u32 tmpccmrx = 0, tmpccer = 0;
+
+/* 파라미터 검사 */
+assert_param(IS_TIM_OC_MODE(TIM_OCInitStruct->TIM_OCMode));
+assert_param(IS_TIM_CHANNEL(TIM_OCInitStruct->TIM_Channel));
+assert_param(IS_TIM_OC_POLARITY(TIM_OCInitStruct->TIM_OCPolarity));
+
+/* TIMx의 CCER 백업 */
+tmpccer = TIMx->CCER;
+```
+
+#### 5.4.2 채널 그룹 선택(CCMR1: CH1/2, CCMR2: CH3/4) 및 그룹 공통 초기화(OC Mode/Polarity Field Clear)
+```c
+/* TIM_OCInitStructure->TIM_Channel 에는 TIM_Channel_1 이 저장되어 있다. */
+if ((TIM_OCInitStruct->TIM_Channel == (u16)TIM_Channel_1) ||
+    (TIM_OCInitStruct->TIM_Channel == (u16)TIM_Channel_2))
+{
+  /*
+   * 채널 그룹 선택(CCMR1: CH1/2, CCMR2: CH3/4)
+   * 채널 1을 설정할 수 있는 CCMR1 선택
+   */
+  tmpccmrx = TIMx->CCMR1;
+
+  /*
+   * 그룹 공통 초기화(OC Mode/Polarity Field Clear)
+   * #define CCER_CC1P_Mask              ((u16)0x3331)
+   * #define CCER_CC2P_Mask              ((u16)0x3313)
+   * #define CCER_CC3P_Mask              ((u16)0x3133)
+   * #define CCER_CC4P_Mask              ((u16)0x1333)
+
+   * static uc16 Tab_OCModeMask[4] = {0xFF00, 0x00FF, 0xFF00, 0x00FF};
+   * static uc16 Tab_PolarityMask[4] = {CCER_CC1P_Mask, CCER_CC2P_Mask, CCER_CC3P_Mask, CCER_CC4P_Mask};
+  
+   * Tab_OCModeMask[TIM_Channel_1] = 0xFF00
+   * tmpccmrx &= Tab_OCModeMask[0xFF00]; → 해당 마스크를 사용하여 CCMR1의 하위 8비트(=CH1 관련 OC 필드)가 0으로 정리된다.
+   * tmpccer &= Tab_PolarityMask[0x3331]; → 해당 마스크를 사용하여 CCER의 1번 비트(=CC1P)가 0으로 정리된다.
+   */
+  tmpccmrx &= Tab_OCModeMask[TIM_OCInitStruct->TIM_Channel];
+  tmpccer &= Tab_PolarityMask[TIM_OCInitStruct->TIM_Channel];
+
+  /*
+   * 채널별 설정(Disable → 모드 → CCRx → Enable/Polarity)
+   * #define CCER_CC1E_Reset             ((u16)0x3332)
+   * #define CCER_CC1E_Reset             ((u16)0x0001)
+   * TIMx->CCER &= 0x3332; → CCER의 0번 비트(=CC1E)를 0으로 내려 설정 도중 출력이 흔들리는 것을 막는다.
+   * tmpccmrx |= TIM_OCInitStruct->TIM_OCMode_PWM1; → 채널1은 CCMR1의 하위 바이트에 모드가 들어가므로 Shift 연산 없이 tmpccmrx에 올린다.
+   * TIMx->CCR1 = TIM_OCInitStruct->CCR1_Val; → 듀티(또는 OC 비교값) 기준이 되는 CCR1이 설전된다.
+   * tmpccer |= 0x0001; → 채널 1을 Enable 상태로 만들기 위한 비트를 tmpccer에 올린다.
+   * tmpccer |= TIM_OCInitStruct->TIM_OCPolarity_High; → 반영할 Polarity 를 tmpccer에 올린다(High는 값이 0이라 OR 해도 변화가 없다).
+   */
+  if (TIM_OCInitStruct->TIM_Channel == TIM_Channel_1)
+  {
+    TIMx->CCER &= CCER_CC1E_Reset; 
+
+    tmpccmrx |= TIM_OCInitStruct->TIM_OCMode;
+
+    TIMx->CCR1 = TIM_OCInitStruct->TIM_Pulse;
+
+    tmpccer |= CCER_CC1E_Set;
+
+    tmpccer |= TIM_OCInitStruct->TIM_OCPolarity;
+  }
+  else {/* TIM_Channel_2 */}
+
+  /*
+   * CCMR 반영
+   * TIM3->CCMR1의 CH1 영역이 PWM1 모드로 바뀜
+   */
+  TIMx->CCMR1 = (u16)tmpccmrx;
+}
+else{/* TIM_Channel_3 , TIM_Channel_4 */}
+
+/*
+ * CCER 반영
+ * CH1 enable(CC1E=1)이 확정된다.
+ * Polarity는 High(=0)이므로 CC1P는 기본(비반전) 방향으로 유지된다.
+ */
+TIMx->CCER = (u16)tmpccer;
+```
+
 ---
 
 ## 6. 외부 트리거 및 이벤트 전파 관리 (CR2, SMCR, DIER)
@@ -305,6 +423,13 @@ void TIM_Cmd(TIM_TypeDef* TIMx, FunctionalState NewState)
 |Bit[6:4]|MMS|Master Mode Selection. 마스터로서 외부(TRGO)에 보낼 신호 선택. <br> - `000` : Reset(UG 비트로 트리거) <br> - `001` : Enable(CEN 비트로 트리거) <br> - `010` : Update(업데이트 이벤트로 트리거) <br> - `011` : Compare Pulse(Capture/Compare Match 성공으로 트리거) <br> - `100` : Compare-OC1REF : 채널 1의 출력 참조 신호(OC1REF)를 TRGO 신호로 사용 <br> - `101` : Compare-OC2REF : 채널 2의 출력 참조 신호(OC2REF)를 TRGO 신호로 사용 <br> - `110` : Compare-OC3REF : 채널 3의 출력 참조 신호(OC3REF)를 TRGO 신호로 사용 <br> - `111` : Compare-OC4REF : 채널 4의 출력 참조 신호(OC4REF)를 TRGO 신호로 사용|
 |Bit[7]|TI1S|TI1 Selection. <br> -`0` : CH1 핀이 TI1 입력에 직접 연결됨. <br> - `1` : CH1, CH2, CH3 핀의 XOR 연산 결과가 TI1 입력에 연결됨.|
 
+**타이머가 발생시킨 이벤트를 외부 장치에 알리는 '출력' 설정 예시**:
+- **ADC 자동 샘플링 트리거**
+  - 타이머 주기가 끝날 때마다(`MMS = 010, Update`) 자동으로 ADC 변환을 시작하고 싶을 때 사용한다.
+  - CPU가 매번 개입하지 않아도 정해진 시간 간격마다 센서 값을 읽을 수 있다.
+- **다른 타이머 구동**
+  - 본인의 카운터가 시작될 때(`MMS = 001, Enable`) 연결된 슬레이브 타이머도 동시에 시작하게 하여 두 타이머의 동기화를 맞춘다.
+
 ### 6.2 TIMx_SMCR (Slave Mode Control Register)
 외부 신호를 타이머의 클럭으로 사용하거나, 트리거 입력에 따른 자동 동작(Reset, Strat 등)을 설정
 
@@ -318,18 +443,32 @@ void TIM_Cmd(TIM_TypeDef* TIMx, FunctionalState NewState)
 |Bit[14]|ECE|External Clock Enable. `1` 설정 시 외부 트리거 입력(ETRF) 신호를 타이머의 메인 클럭 소스로 사용|
 |Bit[15]|ETP|External Trigger Polarity. 외부 트리거 신호의 극성을 선택(0: 상승 에지, 1: 하강 에지)|
 
+**외부에서 들어오는 신호에 따라 타이머의 동작 방식을 결정하는 '입력' 설정 예시**":
+- **외부 펄스 카운팅(External Clock Mode)**
+  - 내부 클럭 대신 외부 핀(`ETR`)으로 들어오는 펄스를 클럭으로 사용한다.
+  - 이를 통해 컨베이어 벨트의 물체 개수나 유량계의 펄스 수를 직접 CNT 레지스터로 셀 수 있다.
+- **타이머 간 동기화(Gated/Trigger Mode)**
+  - 마스터 타이머의 신호를 받아 본인의 카운터를 초기화하거나(`SMS = 100, Reset`), 특정 구간에서만 동작하게(`SMS = 101, Gated`) 조절한다.
+
 ### 6.3 TIMx_DIER (DMA/Interrupt Enable Register)
 타이머 내부에서 발생한 각 이벤트를 시스템 인터럽트나 DMA 요청으로 연결할지 결정.
 
 |비트|이름|설명|
 |----|----|----|
 |Bit[0]|UIE|Update Interrupt Enable. 업데이트 이벤트 발생 시 인터럽트 요청을 활성화|
-|Bit[4:1]CCxIE|Capture/Compare x Interrupt Enable. 채널 1~4의 비교 일치 또는 캡처 발생 시 인터럽트를 활성화|
+|Bit[4:1]|CCxIE|Capture/Compare x Interrupt Enable. 채널 1~4의 비교 일치 또는 캡처 발생 시 인터럽트를 활성화|
 |Bit[6]|TIE|Trigger Interrupt Enable. 트리거 이벤트 발생 시 인터럽트 요청을 활성화|
 |Bit[8]|UDE|Update DMA Enable. 업데이트 이벤트 발생 시 DMA 요청을 활성화|
 |Bit[12:9]|CCxDE|Capture/Compare x DMA Enable. 각 채널의 비교/캡처 이벤트 발생 시 DMA 요청을 활성화|
 |Bit[14]|TDE|Trigger DMA Enable. 트리거 이벤트 발생 시 DMA 요청을 활성화|
 
+**타이머 내부에서 발생한 이벤트(Update, Compare 등)를 시스템 전체의 작업으로 연결하는 설정 예시**:
+- **주기적인 데이터 처리(Interrupt)**
+  - `UIE`를 활성화하여 타이머 주기가 끝날 때마다 CPU를 호출한다.
+  - CPU는 인터럽트 서비스 루틴(ISR)에서 제어 알고리즘을 계산하거나 상태를 업데이트한다.
+- **대량 데이터 고속 전송(DMA)**
+  - `UDE`나 `CCxDE`를 활성화한다.
+  - 예를 들어, 타이머 주기에 맞춰 메모리에 있는 데이터를 DAC로 자동으로 보내 복잡한 파형을 생성할 때 사용한다.
 
 ---
 
