@@ -31,13 +31,13 @@
 - **설정값** : `TIM_CKD_DIV1`, `TIM_CKD_DIV2`, `TIM_CKD_DIV4` 중 선택 가능
 
 ### 3.1 $t_{DTS}$(Dead-time and Digital Filter Sampling Clock)
-타이머가 숫자를 세는 메인 시계(CK_CNT)와는 별개로, **입력 신호를 감시(필터링)**\하거나 **출력 신호의 안전 구간(데드타임)을 계산**하기 위해 존재한다
+타이머가 숫자를 세는 메인 시계(CK_CNT)와는 별개로, **입력 신호를 감시(필터링)**\ 하거나 **출력 신호의 안전 구간(데드타임)을 계산**하기 위해 존재한다
 
 ### 3.2 $t_{DTS}$의 생성 원리
 타이머로 들어오는 내부 클럭($f_{TIM}$ 또는 CK_INT)을 `TIMx_CR1` 레지스터의 **CKD(Clock Division)** 비트 설정에 따라 나누어 생성한다
-- **CKD = 00**(DIV1): $t_{DTR}=t_{CK\_INT}$ (분주 없음)
-- **CKD = 01**(DIV2): $t_{DTR}=2 \times t_{CK\_INT}$ (2분주, 2배 느린 시계)
-- **CKD = 10**(DIV4): $t_{DTR}=4 \times t_{CK\_INT}$ (4분주, 4배 느린 시계)
+- **CKD = 00**(DIV1): $t_{DTR}=t_{`CK_INT`}$ (분주 없음)
+- **CKD = 01**(DIV2): $t_{DTR}=2 \times t_{`CK_INT`}$ (2분주, 2배 느린 시계)
+- **CKD = 10**(DIV4): $t_{DTR}=4 \times t_{`CK_INT`}$ (4분주, 4배 느린 시계)
 
 ### 3.3 $t_{DTS}$가 사용되는 곳
 #### 3.3.1 디지털 필터(Digital Filter)
