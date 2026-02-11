@@ -35,9 +35,9 @@
 
 #### 3.1.1 $t_{DTS}$의 생성 원리
 타이머로 들어오는 내부 클럭($f_{TIM}$ 또는 CK_INT)을 `TIMx_CR1` 레지스터의 **CKD(Clock Division)** 비트 설정에 따라 나누어 생성한다,.
-- **CKD = 00 **$(DIV1):t_{DTR}=t_{CK_INT}$
-- **CKD = 01 **$(DIV2):t_{DTR}=2 \times t_{CK_INT}$
-- **CKD = 10 **$(DIV4):t_{DTR}=4 \times t_{CK_INT}$
+- **CKD = 00 ** $\(DIV1\):t_{DTR}=t_{CK_INT}$
+- **CKD = 01 ** $\(DIV2\):t_{DTR}=2 \times t_{CK_INT}$
+- **CKD = 10 ** $\(DIV4\):t_{DTR}=4 \times t_{CK_INT}$
 
 ### 3.2 디지털 필터(Digital Filter)
 입력 캡처(Input Capture) 경로에 위치하며, 외부에서 들어오는 신호의 **노이즈를 제거**하는 역할을 한다
