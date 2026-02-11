@@ -2,7 +2,7 @@
 
 ![General_Purpose_Timer_Block_Diagram](../../images/General_Purpose_Timer_Block_Diagram.png)
 
-해당 문서는 STM32 타이머 설정에서 **PSC(Prescaler)**와 **CKD(Clock Division)**의 차이를 정리한다
+해당 문서는 STM32 타이머 설정에서 **PSC(Prescaler)와 CKD(Clock Division)의 차이**를 정리한다
 두 설정 모두 클럭을 나누는(분주) 동작을 하지만, **클럭이 도달하는 최종 목적지**가 다르다는 점이 핵심이다
 
 ---
