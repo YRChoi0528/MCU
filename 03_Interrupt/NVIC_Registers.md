@@ -12,7 +12,7 @@ NVIC는 STM32의 **주변장치(GPIO, TIM, EXTI …)** 가 아니라 **Cortex‑
 
 따라서 NVIC는 다음과 같은 특징을 가진다.
 
-- RCC에서 “**NVIC 클럭 enable**” 같은 절차가 없다.
+- RCC에서 "**NVIC 클럭 enable**" 같은 절차가 없다.
 - `NVIC->ISER`, `NVIC->ICER`, `NVIC->IPR` 등은 **코어 내부 레지스터**에 대한 접근이다.
 - 우선순위 그룹(PRIGROUP)은 **SCB->AIRCR**에서 관리된다.
 
@@ -260,7 +260,7 @@ NVIC_Init(&NVIC_InitStructure);
   1. `NVIC->IPR[1:2]`의 해당 바이트에 우선순위 기록  
   2. `NVIC->ISER[0]`의 해당 비트 Set (Enable)
 
-즉, **“IRQ 선택 → 우선순위 기록 → Enable 비트 set”**의 반복 구조다.
+즉, "**IRQ 선택 → 우선순위 기록 → Enable 비트 set**" 의 반복 구조다.
 
 ---
 
