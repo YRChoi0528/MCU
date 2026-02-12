@@ -94,7 +94,10 @@ assert_param(IS_NVIC_SUB_PRIORITY(NVIC_InitStruct->NVIC_IRQChannelSubPriority));
 ### 3.2 PRIGROUP 기반 비트 분할 계산(우선순위의 '경계선' 긋기)
 
 ```c
-/*  0x700은 AIRCR의 PRIGROUP 필드(Bit[10:8]) 마스크이다. */
+/*
+ * 0x700은 AIRCR의 PRIGROUP 필드(Bit[10:8]) 마스크이다.
+ * tmpprioriy는 하위 우선순위가 사용할 비트 수이다.
+ */
 tmppriority = (0x700 - (SCB->AIRCR & (u32)0x700)) >> 0x08;
 
 /* 선점 우선순위가 차지할 비트 수 계산 */
@@ -103,57 +106,119 @@ tmppre = (0x4 - tmppriority);
 /* 하위 우선순위 마스크 결정 */
 tmpsub = tmpsub >> tmppriority; // u32 tmpsub = 0x0F (초기값)
 ```
-- **비트 마스킹의 의미** : `SCB->AIRCR`의 PRIGROUP 값이 `3`(011)이라면, 4bit 중 선점 우선순위에 1bit, 하위 우선순위에 3bit를 할당하겠다는 뜻이다.
+- **비트 마스킹의 의미** : `SCB->AIRCR`의 PRIGROUP 값이 `0x500`이라면, 4bit 중 선점 우선순위에 2bit, 하위 우선순위에 2bit를 할당하겠다는 뜻이다.
 - **왜 4인가?** : STM32의 IPR은 8bit중 상위 4bit만 유효하기 때문이다.
 
 ---
 
 ### 3.3 IPR(우선순위) 레지스터 기록(8bit 필드 채우기)
 
+![NVIC_IPR1](../images/NVIC_IPR1.png)
+> 코드의 동작 흐름을 이해하기 위해 직접 그린 그림입니다. 여러 IPR 중 EXTI0에 대한 예시를 작성하므로 IPR1에 대해 그렸습니다.
+> 공식 사양과 차이가 있을 수 있으니 주의 바랍니다.
+> 
 **1개의 32bit** IPR이 4개의 IRQ(각 8bit)를 관리**하므로 '주소'와 '위치'를 정확하게 찾아야 한다.
 
 1. 인덱스와 오프셋 계산 
 
-$$Byte_{Offset}=(IRQ & 0x03) \times 8 $$ (IRQ를 4로 나눈 나머지 × 8)
-  
-3. 4bit shift(`<< 0x04`)
+IPR_Index = IRQ >> 2 (IRQ ÷ 4)
+Byte_Offset=(IRQ & 0x03) × 8 (IRQ를 4로 나눈 나머지 × 8)
+
+- **예시**: 만약 EXTI0(IRQ 6)**라면:
+  - 6 >> 2 = 3번 IPR을 사용한다
+  - (6 & 3) × 8 = 2 × 8 = 16bit만큼 왼쪽으로 밀어서 저장한다.
+
+2. 4bit shift(`<< 0x04`)
+STM32 하드웨어는 IPR의 8bit 중 **상위 4bit만 인식**한다.
+- 계산한 `tmppriority`가 `0x01`(0001)이라도 하드웨어에 전달할 때는 `0x10`(0001000)이 되어야 하므로 반드시 `<< 0x04`를 해줘야 한다.
 
 
 - IPR 인덱스: `IRQ >> 2`  
 - IPR 내 바이트 오프셋: `(IRQ & 0x03) * 8`
 
 ```c
-tmppriority  = (u32)NVIC_InitStruct->NVIC_IRQChannelPreemptionPriority << tmppre;
-tmppriority |=  NVIC_InitStruct->NVIC_IRQChannelSubPriority & tmpsub;
+/*
+ * `SCB->AIRCR`의 PRIGROUP 값이 `0x500` 인 경우,
+ * tmppriority = 2
+ * tmppre = 2
+ * tmpsub = 3
+ * NVIC_IRQChannelPreemptionPriority = 1, NVIC_IRQChannelSubPriority = 1, NVIC_IRQChannel = EXTI0_IRQChannel(=6) 로 설정할 경우 코드의 흐름을 확인해보겠다.
+ */
+tmppriority  = (u32)NVIC_InitStruct->NVIC_IRQChannelPreemptionPriority << tmppre; // tmpprioriy = 1 << 2 → tmppriority = 4
+tmppriority |=  NVIC_InitStruct->NVIC_IRQChannelSubPriority & tmpsub; // tmpprioriy = 4 | (1 & 3) → tmppriority = 5
 
-/* 하위 4비트는 0으로 두고 상위 비트에 우선순위를 배치 */
+/*
+ * 하위 4비트는 0으로 두고 상위 비트에 우선순위를 배치
+ * tmppriority = 0x00000101
+ * → tmppriority = 0x01010000
+ */
 tmppriority = tmppriority << 0x04;
+
+/*
+ * tmppriority = (u32)0x01010000 << (( 6 & 3 ) * 8)
+ * → tmppriority = (u32)0x01010000 << 16
+ * → tmppriority = 0x00500000
+ */
 tmppriority = ((u32)tmppriority) << ((NVIC_InitStruct->NVIC_IRQChannel & (u8)0x03) * 0x08);
 
+/*
+ * tmpreg = NVIC->IPR[6 >> 2]
+ * → tmpreg = NVIC->IPR[1]
+ */
 tmpreg  = NVIC->IPR[(NVIC_InitStruct->NVIC_IRQChannel >> 0x02)];
+
+/*
+ * tmpmask = (u32)0xFF << (( 6 & 3 ) * 8)
+ * → tmpmask = (u32)0xFF << 16
+ * → tmpmask = 0x00FF0000
+ */
 tmpmask = (u32)0xFF << ((NVIC_InitStruct->NVIC_IRQChannel & (u8)0x03) * 0x08);
 
-tmpreg &= ~tmpmask;          /* 해당 IRQ 바이트 영역 clear */
-tmppriority &= tmpmask;      /* 마스크 적용 */
-tmpreg |= tmppriority;       /* 새 우선순위 삽입 */
+/*
+ * 해당 IRQ 바이트 영역 clear
+ * tmpreg = NVIC->IPR[1] & 0xFF00FFFF
+ */
+tmpreg &= ~tmpmask;
 
+/*
+ * 마스크 적용
+ * tmppriority = 0x00500000 & 0x00FF0000
+ * → tmppriority = 0x00500000
+ */
+tmppriority &= tmpmask;
+
+/*
+ * 새 우선순위 삽입
+ * tmpreg = NVIC->IPR[1] & 0xFF00FFFF | 0x00500000
+ * → tmpreg = NVIC->IPR[1] & 0xFF50FFFF
+ */
+tmpreg |= tmppriority;       
+
+/* NVIC->IPR[1] = NVIC->IPR[1] & 0xFF50FFFF */
 NVIC->IPR[(NVIC_InitStruct->NVIC_IRQChannel >> 0x02)] = tmpreg;
 ```
 
-핵심 포인트
-- IPR은 “IRQ별 8bit 필드”처럼 보이지만, 구현상 **상위 비트만 의미가 있고 하위 비트는 0으로 유지**되는 형태가 일반적이다.
-- 라이브러리는 `<< 0x04`를 통해 우선순위 값을 상위 비트 위치로 이동시키는 형태를 취한다.
-
 ---
 
-### 3.4 (4) ISER/ICER(Enable/Disable) 기록
+### 3.4 (4) ISER/ICER(Enable/Disable) 기록(스위치 켜고 끄기)
 
-IRQ 번호는 1개 레지스터가 32개 IRQ를 담당한다.
+![NVIC_ISER0](../images/NVIC_ISER0.png)
+> 코드의 동작 흐름을 이해하기 위해 직접 그린 그림입니다. 여러 ISER 중 EXTI0에 대한 예시를 작성하므로 ISER0에 대해 그렸습니다.
+> 공식 사양과 차이가 있을 수 있으니 주의 바랍니다.
 
-- ISER/ICER 인덱스: `IRQ >> 5`  (32로 나눔)
-- 비트 위치: `IRQ & 0x1F`        (0~31)
+인터럽트의 활성화 여부를 결정한다. 여기서는 1bit가 IRQ 1개를 담당하므로 32개씩 묶인다.
+
+- ISER/ICER 인덱스: `IRQ >> 5`  (32로 나누기)
+- 비트 위치: `IRQ & 0x1F`       (0~31)
 
 ```c
+/*
+ * IRQ 6 (EXTI0)를 Enable 하는 경우
+ * Index : 6 >> 5 = 0 (ISER[0] 사용)
+ * Bit : 6 & 0x1F = 0x06 (6번째 비트를 1로 Set)
+ * NVIC->ISER[0] = u(32)0x01 << 6;
+ * /
+
 /* Enable */
 NVIC->ISER[(NVIC_InitStruct->NVIC_IRQChannel >> 0x05)] =
   (u32)0x01 << (NVIC_InitStruct->NVIC_IRQChannel & (u8)0x1F);
@@ -192,8 +257,8 @@ NVIC_Init(&NVIC_InitStructure);
 위 코드는 `NVIC_Init()` 내부에서 다음을 의미한다.
 
 - EXTI0/1/2 IRQ 각각에 대해  
-  1) `NVIC->IPR[]`의 해당 바이트에 우선순위 기록  
-  2) `NVIC->ISER[]`의 해당 비트 set (Enable)
+  1) `NVIC->IPR[1:2]`의 해당 바이트에 우선순위 기록  
+  2) `NVIC->ISER[0]`의 해당 비트 Set (Enable)
 
 즉, **“IRQ 선택 → 우선순위 기록 → Enable 비트 set”**의 반복 구조다.
 
@@ -216,13 +281,3 @@ NVIC_Init(&NVIC_InitStructure);
 - `stm32f10x_it.c` : 실제 인터럽트 발생 시 실행될 동작 정의
 
 로 역할이 분리된다.
-
----
-
-## 7. 정리
-
-- NVIC는 **코어 내부 레지스터**이며 RCC 클럭 enable 대상이 아니다.
-- `NVIC_Init()`는 구조체 값을 기반으로  
-  - `NVIC->IPR[]`에 우선순위를 기록하고  
-  - `NVIC->ISER[]/ICER[]`로 IRQ Enable/Disable을 수행한다.
-- `main.c`의 `NVIC_Init()` 호출은 결국 “IPR 기록 + ISER 비트 set”으로 귀결된다.
