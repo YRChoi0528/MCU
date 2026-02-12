@@ -122,7 +122,7 @@ tmpsub = tmpsub >> tmppriority; // u32 tmpsub = 0x0F (초기값)
 #### 3.3.1. 인덱스와 오프셋 계산 
 
 - IPR_Index = IRQ >> 2 (IRQ ÷ 4)
-- Byte_Offset=(IRQ & 0x03) × 8 (IRQ를 4로 나눈 나머지 × 8)
+- Byte_Offset = (IRQ & 0x03) × 8 (IRQ를 4로 나눈 나머지 × 8)
 
 - **예시**: 만약 EXTI0(IRQ 6)**라면:
   - 6 >> 2 = 3번 IPR을 사용한다
