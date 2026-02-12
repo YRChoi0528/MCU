@@ -113,7 +113,7 @@ tmpsub = tmpsub >> tmppriority; // u32 tmpsub = 0x0F (초기값)
 **1개의 32bit** IPR이 4개의 IRQ(각 8bit)를 관리**하므로 '주소'와 '위치'를 정확하게 찾아야 한다.
 
 1. 인덱스와 오프셋 계산 
-&&IPR_{Index}=IRQ>>2   (IRQ \texr{÷} 4)&&
+
 $$Byte_{Offset}=(IRQ & 0x03) \times 8 $$ (IRQ를 4로 나눈 나머지 × 8)
   
 3. 4bit shift(`<< 0x04`)
