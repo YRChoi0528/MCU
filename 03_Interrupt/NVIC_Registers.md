@@ -114,9 +114,9 @@ tmpsub = tmpsub >> tmppriority; // u32 tmpsub = 0x0F (초기값)
 ### 3.3 IPR(우선순위) 레지스터 기록(8bit 필드 채우기)
 
 ![NVIC_IPR1](../images/NVIC_IPR1.png)
-> 코드의 동작 흐름을 이해하기 위해 직접 그린 그림입니다. 여러 IPR 중 EXTI0에 대한 예시를 작성하므로 IPR1에 대해 그렸습니다.
+> 코드의 동작 흐름을 이해하기 위해 직접 그린 그림입니다. 여러 IPR 중 EXTI0에 대한 예시를 작성하므로 IPR1에 대해 그렸습니다. </br>
 > 공식 사양과 차이가 있을 수 있으니 주의 바랍니다.
-> 
+
 **1개의 32bit** IPR이 4개의 IRQ(각 8bit)를 관리**하므로 '주소'와 '위치'를 정확하게 찾아야 한다.
 
 1. 인덱스와 오프셋 계산 
@@ -203,7 +203,7 @@ NVIC->IPR[(NVIC_InitStruct->NVIC_IRQChannel >> 0x02)] = tmpreg;
 ### 3.4 (4) ISER/ICER(Enable/Disable) 기록(스위치 켜고 끄기)
 
 ![NVIC_ISER0](../images/NVIC_ISER0.png)
-> 코드의 동작 흐름을 이해하기 위해 직접 그린 그림입니다. 여러 ISER 중 EXTI0에 대한 예시를 작성하므로 ISER0에 대해 그렸습니다.
+> 코드의 동작 흐름을 이해하기 위해 직접 그린 그림입니다. 여러 ISER 중 EXTI0에 대한 예시를 작성하므로 ISER0에 대해 그렸습니다. </br>
 > 공식 사양과 차이가 있을 수 있으니 주의 바랍니다.
 
 인터럽트의 활성화 여부를 결정한다. 여기서는 1bit가 IRQ 1개를 담당하므로 32개씩 묶인다.
