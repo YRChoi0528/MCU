@@ -257,8 +257,8 @@ NVIC_Init(&NVIC_InitStructure);
 위 코드는 `NVIC_Init()` 내부에서 다음을 의미한다.
 
 - EXTI0/1/2 IRQ 각각에 대해  
-  1) `NVIC->IPR[1:2]`의 해당 바이트에 우선순위 기록  
-  2) `NVIC->ISER[0]`의 해당 비트 Set (Enable)
+  1. `NVIC->IPR[1:2]`의 해당 바이트에 우선순위 기록  
+  2. `NVIC->ISER[0]`의 해당 비트 Set (Enable)
 
 즉, **“IRQ 선택 → 우선순위 기록 → Enable 비트 set”**의 반복 구조다.
 
