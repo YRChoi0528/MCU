@@ -2,21 +2,21 @@
 
 ## 요약
 
-해당 문서는 STM32 기반 임베디드 시스템에서 사용되는 직렬 통신 방식 중 수업 시간에 배우게 되는 USART, I2C, SPI에 대한 상위 개요 문서이다.
+해당 문서는 STM32 기반 임베디드 시스템에서 사용되는 직렬 통신 방식 중 수업 시간에 배우게 되는 USART, I2C, SPI에 대한 상위 개요 문서이다. </br>
 각 통신 방식의 동작 개념, 구조적 특징, 사용 목적을 정리하고 이후 하위 문서(USART_Registers.md, I2C_Registers.md, SPI_Registers.md)에서 레지스터 단위의 상세 내용을 다룬다.
 
 ---
 
 ## 1. 직렬 통신 개요
 
-임베디드 시스템에서 통신은 CPU 외부와 데이터를 교환하기 위한 핵심 수단이다.
+임베디드 시스템에서 통신은 CPU 외부와 데이터를 교환하기 위한 핵심 수단이다. </br>
 STM32 MCU는 다양한 직렬 통신 주변장치를 제공하며, 각 통신은 **동기/비동기 방식**, **클럭 존재 여부**, **배선 수**, **속도**, **연결 구조** 측면에서 차이를 가진다.
 
 본 문서에서는 다음 세 가지 통신을 다룬다.
 
-* USART (Universal Synchronous/Asynchronous Receiver/Transmitter)
-* I2C (Inter-Integrated Circuit)
-* SPI (Serial Peripheral Interface)
+- USART (Universal Synchronous/Asynchronous Receiver/Transmitter)
+- I2C (Inter-Integrated Circuit)
+- SPI (Serial Peripheral Interface)
 
 ---
 
