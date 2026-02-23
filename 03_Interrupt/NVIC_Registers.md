@@ -150,14 +150,14 @@ tmppriority |=  NVIC_InitStruct->NVIC_IRQChannelSubPriority & tmpsub; // tmpprio
 
 /*
  * 하위 4비트는 0으로 두고 상위 비트에 우선순위를 배치
- * tmppriority = 0x00000101
- * → tmppriority = 0x01010000
+ * tmppriority = 0x00000005
+ * → tmppriority = 0x00000050
  */
 tmppriority = tmppriority << 0x04;
 
 /*
- * tmppriority = (u32)0x01010000 << (( 6 & 3 ) * 8)
- * → tmppriority = (u32)0x01010000 << 16
+ * tmppriority = (u32)0x00000050 << (( 6 & 3 ) * 8)
+ * → tmppriority = (u32)0x00000050 << 16
  * → tmppriority = 0x00500000
  */
 tmppriority = ((u32)tmppriority) << ((NVIC_InitStruct->NVIC_IRQChannel & (u8)0x03) * 0x08);
