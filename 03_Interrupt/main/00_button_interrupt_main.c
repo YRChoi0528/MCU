@@ -39,7 +39,7 @@ int main(void){
   unsigned int LED_data = 0x0080;
 
   Init_STM32F103();
-  Timer2_Delay_init();
+  Timer_init();
   
   /* 
    * 클럭 활성화 (APB2)
