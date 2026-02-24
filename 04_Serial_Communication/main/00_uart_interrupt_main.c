@@ -1,24 +1,6 @@
 #include "stm32f10x_lib.h"
-#include"system_func.h"
+#include "system_func.h"
 
-void putch(unsigned char c){
-  USART_SendData(USART1, c);
-  while (USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET);
-}
-
-void puts(u8 *s){
-  while (*s != '\0'){
-    putch(*s);
-    s ++;
-  }
-}
-
-unsigned char getch(){
-  unsigned char key = 0;
-  while (USART_GetFlagStatus(USART1, USART_FLAG_RXNE) == RESET);
-  key = USART_ReceiveData(USART1);
-  return key;
-}
 
 int main(void){
   Init_STM32F103();
