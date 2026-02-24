@@ -46,9 +46,10 @@
 - External Interrupt
 - Timer Interrupt
 
-### 3.4 UART
-- Normal UART
-- Interrupt UART
+### 3.4 Serial Communication
+- UART
+- Temperature / Humidity Sensor Module (I2C)
+- Serial Flash Memory (SPI)
 
 ### 3.5 Peripheral Devices
 - Step Motor
@@ -58,9 +59,6 @@
 - Photo Diode (ADC)
 - Serial / Parallel (DAC)
 
-### 3.7 SPI / I2C
-- Serial Flash Memory (SPI)
-- Temperature / Humidity Sensor Module (I2C)
 
 각 실습은 단순한 코드 작성에 그치지 않고, **설정한 레지스터와 핀 동작이 실제 하드웨어에서 어떻게 반영되는지**를 확인하는 데 중점을 두었다.
 
