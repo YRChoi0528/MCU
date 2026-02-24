@@ -2,15 +2,15 @@
 #include "System_func.h"
 
 void Timer_init(){
-  TIM_TimeBaseInitTypeDef TIM2_TimeBaseInitStruct;
+  TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct;
   
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2,ENABLE);
  
-  TIM2_TimeBaseInitStruct.TIM_Prescaler = 7200-1;  
-  TIM2_TimeBaseInitStruct.TIM_CounterMode = TIM_CounterMode_Up;
-  TIM2_TimeBaseInitStruct.TIM_Period = 10-1;  
-  TIM2_TimeBaseInitStruct.TIM_ClockDivision = TIM_CKD_DIV1;
-  TIM_TimeBaseInit(TIM2,&TIM2_TimeBaseInitStruct);
+  TIM_TimeBaseInitStruct.TIM_Prescaler = 7200-1;  
+  TIM_TimeBaseInitStruct.TIM_CounterMode = TIM_CounterMode_Up;
+  TIM_TimeBaseInitStruct.TIM_Period = 10-1;  
+  TIM_TimeBaseInitStruct.TIM_ClockDivision = TIM_CKD_DIV1;
+  TIM_TimeBaseInit(TIM2,&TIM_TimeBaseInitStruct);
 }
 
 void delay_ms(u16 time){
