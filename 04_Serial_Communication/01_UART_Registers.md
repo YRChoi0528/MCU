@@ -55,9 +55,9 @@ USART_SR은 송수신 상태와 각종 에러 발생 여부를 나타내는 플�
 |Bit[8]|LBD|LIN Break Detection 플래그. <br> LIN 통신 중 Break 신호가 감지되면 1로 SET.|
 |Bit[9]|CTS|Clear To Send 플래그. <br> 하드웨어 흐름 제어 시 nCTS 입력 핀의 상태가 변경되면 1로 SET.|
 
-```
-LIN(Local Interconnect Network) : 자동차 내의 창문, 와이퍼, 좌석 제어 등 저속/저비용 차량용 네트워크에 사용되는 통신 규격으로서, 실습에서는 사용하지 않는다.
-```
+
+> LIN(Local Interconnect Network) : 자동차 내의 창문, 와이퍼, 좌석 제어 등 저속/저비용 차량용 네트워크에 사용되는 통신 규격으로서, 실습에서는 사용하지 않는다.
+
 
 ---
 
@@ -144,9 +144,9 @@ Stop Bit 길이 조절 및 동기식 클럭 출력, LIN 통신 설정을 담당�
 |Bit[13:12]|STOP|Stop Bit 길이를 설정한다. <br> `00`:1bit <br> `01`:0.5bit <br> `10`:1.5bit <br> `11`:2bit|
 |Bit[14]|LINEN|LIN Mode Enable. <br> LIN 통신 모드를 활성화한다.|
 
-```
-Stop Bit에서 .5bit는 반쪽짜리 데이터가 아니라, 1bit를 전송하는 시간의 절반(0.5배)만큼만 통신선을 쉬게 하라는 '타이머' 설정이다.
-```
+
+> Stop Bit에서 .5bit는 반쪽짜리 데이터가 아니라, 1bit를 전송하는 시간의 절반(0.5배)만큼만 통신선을 쉬게 하라는 '타이머' 설정이다.
+
 
 ---
 
@@ -168,10 +168,10 @@ Stop Bit에서 .5bit는 반쪽짜리 데이터가 아니라, 1bit를 전송하�
 |Bit[9]|CTSE|CTS Enable. <br> 송신을 위한 CTS 흐름 제어를 활성화한다.|
 |Bit[10]|CTSIE|CTS Interrupt Enable. <br> CTS 상태 변경 시 인터럽트를 허용한다.|
 
-```
-IrDA(Infrared Data Association) : 과거 휴대폰이나 TV 리모컨 등에 쓰이던 적외선 기반 무선 통신 규격으로서, 실습에서는 사용하지 않는다. </br>
-Smartcard : 신용카드나 유심(USIM) 칩 등에 들어가는 IC 카드와 통신하기 위한 국제 규격으로서, 실습에서는 사용하지 않는다.
-```
+
+> IrDA(Infrared Data Association) : 과거 휴대폰이나 TV 리모컨 등에 쓰이던 적외선 기반 무선 통신 규격으로서, 실습에서는 사용하지 않는다. </br>
+> Smartcard : 신용카드나 유심(USIM) 칩 등에 들어가는 IC 카드와 통신하기 위한 국제 규격으로서, 실습에서는 사용하지 않는다.
+
 
 ---
 
