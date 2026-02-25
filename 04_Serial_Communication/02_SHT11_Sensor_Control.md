@@ -88,7 +88,7 @@ void s_transstart(void)
 
 - SCK가 High인 상태에서 DATA 핀을 Low로 내리고(`T2`), 다시 SCK가 High일 때 DATA 핀을 High로 올리는(`T5`) 일련의 GPIO 토글 과정을 거친다.
 
-![SHT11_Transmission_Start](./images/SHT11_Transmission_Start.png)
+![SHT11_Transmission_Start](../images/SHT11_Transmission_Start.png)
 
 ```
 Time (흐름) : T0    T1    T2    T3    T4    T5    T6
@@ -114,7 +114,7 @@ SCK  (SCL)    |     │     |     │     │     |     │
 - 8bit 전송 후, SDA를 입력(`MAKE_I2CDATA_INPUT()`)으로 바꾸고 9번째 클럭에서 `READDATA()`를 호출해 센서가 SDA를 Low로 당겼는지(ACK) 확인한다.
 
 
-![SHT11_address_command](./images/SHT11_address_command.png)
+![SHT11_address_command](../images/SHT11_address_command.png)
 
 ```c
                             // add  commnad
@@ -234,8 +234,8 @@ u8 s_measure(u16 *p_value, u16 *p_checksum, u8 mode)
 }
 ```
 
-![SHT11_Serial_Interface](./images/SHT11_Serial_Interface.png)
-![SHT11_Timing_Diagram](./images/SHT11_Timing_Diagram.png)
+![SHT11_Serial_Interface](../images/SHT11_Serial_Interface.png)
+![SHT11_Timing_Diagram](../images/SHT11_Timing_Diagram.png)
 
 위 그림은 습도를 가정으로 든 **측정 및 데이터 수신 단계**에 대한 타이밍 다이어그램이다. </br>
 **얇은선은 MCU가 제어**하는 것이고, **굵은선은 SHT11 센서가 제어**하는 것이다.
