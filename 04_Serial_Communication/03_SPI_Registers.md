@@ -202,6 +202,47 @@ void SPI_Init(SPI_TypeDef* SPIx, SPI_InitTypeDef* SPI_InitStruct)
 플래시 메모리의 모든 통신 처리과정은 `CS Low`(시작) → `Opcode 전송` → `주소 전송` → `데이터 송수신` → `CS High`(종료) 의 프레임으로 구성된다.
 
 ### 9.1 메모리 초기화: `at25fxx_CHIP_ERASE()`
+
+플래시 메모리의 물리적 특성상, 데이터를 쓸 때 bit를 `1` 또는 `0`으로만 바꿀 수 있다. 따라서 덮어쓰기를 하려면 무조건 먼저 데이터를 지워서(Erase) 모든 bit를 `1`로 만들어야 한다.
+
+1. **잠금 해제** : `at25fxx_WREN()`을 호출하여 내부에 쓰기 권한을 얻는다(`0x06` 전송).
+2. **명령 전송** : CS를 Low로 내리고 `CHIP_ERASE(0x62)`명령을 전송한 다음 CS를 High로 올려 실제 동작을 수행시킨다.
+3. **작업 완료 대기** : `at25fxx_Ready()`함수에서 `RDSR(0x05)`명령을 전송하여 플래시 메모리의 내부 상태 레지스터를 계속 읽어오며, **RDY(Busy) 비트가 0이 될 때까지 폴링 대기**한다.
+
+```c
+void at25fxx_WREN(){    
+  AT25FXX_CS_LOW();
+  SPI_FLASH_SendByte(WREN);
+  AT25FXX_CS_HIGH();
+}
+
+void at25fxx_Ready(){
+  
+  u8 buf;
+  
+  do{  
+    AT25FXX_CS_LOW(); 
+    
+    SPI_FLASH_SendByte(RDSR);  
+    buf = SPI_FLASH_SendByte(0);  
+    SPI_FLASH_SendByte(0);      
+    
+    AT25FXX_CS_HIGH();      
+  }while((buf & 1<<(RDY))); /* 레지스터를 읽어와 준비상태가 되어있을떄까지 루프(RDY = 0) */
+}
+
+void at25fxx_CHIP_ERASE(){
+  at25fxx_WREN();   
+  AT25FXX_CS_LOW();
+  SPI_FLASH_SendByte(CHIP_ERASE);  
+  AT25FXX_CS_HIGH();  
+
+  at25fxx_Ready();
+}
+```
+
+### 9.2 데이터 쓰기: `at25fxx_Write_Byte()` / `at25fxx_Write_Arry()`
+
 주소 공간에 실제 데이터를 기록하는 과정이다.
 
 1. **잠금 해제** : 쓰기 작업이므로 `at25fxx_WREN()`이 먼저 실행된다.
@@ -209,13 +250,100 @@ void SPI_Init(SPI_TypeDef* SPIx, SPI_InitTypeDef* SPI_InitStruct)
 3. **데이터 전송 및 종료** : 기록할 데이터 byte들을 연속으로 보낸 뒤, **CS를 High로 올려야만 내부적으로 실제 플래시 메로리에 기록이 시작**된다. 이후 `at25fxx_Ready()`로 작업이 끝날 때까지 대기한다.
 
 
+```c
+void at25fxx_Write_Byte(u16 addr, u8 buf){
+  
+  at25fxx_WREN ();
+  
+  AT25FXX_CS_LOW();      
+  SPI_FLASH_SendByte(PROGRAM);
 
+  /*
+   * AT25Fxx는 24bit 길이의 주소를 수신하도록 하드웨어 규격이 정해져있다.
+   * 실습에 사용되는 AT25F512는 64KByte 용량의 플래시 메모리이므로 16bit의 주소만 있으면 된다.
+   */
+  SPI_FLASH_SendByte(0);                 /* 최상위 8bit (사용하지 않으므로 더미 값 전송) */
+  SPI_FLASH_SendByte((addr>>8) & 0xff);  /* 중간 8bit (입력받은 16bit 주소의 상위 byte) */
+  SPI_FLASH_SendByte((addr) & 0xff);     /* 최하위 8bit (입력받은 16bit 주소의 하위 byte*/
+  SPI_FLASH_SendByte(buf);
 
+  AT25FXX_CS_HIGH();
+  at25fxx_Ready();  
+}
 
+void at25fxx_Write_Arry(u16 addr, u8* BPbuf,u8 size){
 
+  at25fxx_WREN ();
+  
+  AT25FXX_CS_LOW();      
+  SPI_FLASH_SendByte(PROGRAM);
 
+  SPI_FLASH_SendByte(0);    
+  SPI_FLASH_SendByte((addr>>8) & 0xff);
+  SPI_FLASH_SendByte((addr) & 0xff);
+    
+  for(;size>0;size--,BPbuf++) 
+  { 
+    SPI_FLASH_SendByte(*BPbuf);
 
+    /*
+     * 실습에서 사용하는 플래시 메모리는 한 번에 쓸 수 있는 최대 버퍼가 256byte(1페이지) 이다.
+     * 주소의 하위 8bit가 0x00이 되는 순간 쓰기를 강제로 멈춘다.
+     * 이는 데이터가 다음 페이지로 넘어가지 않고 현재 페이지의 처음으로 돌아가 기존 데이터를 덮어쓰는 에러를 방지한다.
+     * 실습에서는 주로 256byte 미만의 데이터를 전송하기 때문에 문제가 되지 않지만,
+     * 256byte가 넘는 데이터를 전송하게 된다면 추가적인 코드가 작성되어야 한다.
+     */
+    if(!((++addr)&0xFF))  break;
+  }
 
+  AT25FXX_CS_HIGH();  
+  at25fxx_Ready();
+}
 
+```
 
+### 9.3 데이터 읽기: `at25fxx_Read_Byte()` / `at25fxx_Read_Arry()`
 
+읽기 작업에는 `WREN`이나 `Ready`대기 과정이 필요 없다.
+
+1. **명령 및 주소 전송** : CS를 Low로 내리고 `READ(0x03)`명령과 3byte 주소를 전송한다.
+2. **데이터 수신(더미 데이터 송신)** : SPI는 전이중 통신이므로, 클럭을 내보내야 상대방의 데이터를 받을 수 있다.
+3. **종료** : 원하는 만큼 읽었다면 CS를 High로 올려 통신을 종료한다.
+
+```c
+u8 at25fxx_Read_Byte(u16 addr){   
+  
+  u8 buf=0;
+  AT25FXX_CS_LOW();      
+  
+  SPI_FLASH_SendByte(READ);
+
+  SPI_FLASH_SendByte(0);  
+  SPI_FLASH_SendByte((addr>>8) & 0xff);
+  SPI_FLASH_SendByte((addr) & 0xff);
+
+  /* 더미 데이터(0x00)를 송신하여 하드웨어가 8개의 SCK클럭을 출력하게 만들고, 이때 MISO 핀으로 들어온 플래시 메모리의 데이터를 저장한다. */
+  buf = SPI_FLASH_SendByte(0);
+  
+  AT25FXX_CS_HIGH();    
+  return buf;
+}
+
+void at25fxx_Read_Arry(u16 addr, u8* BPbuf,u8 size){
+
+  AT25FXX_CS_LOW();      
+  SPI_FLASH_SendByte(READ);
+
+  SPI_FLASH_SendByte(0);    
+  SPI_FLASH_SendByte((addr>>8) & 0xff);
+  SPI_FLASH_SendByte((addr) & 0xff);
+    
+  for(;size>0;size--,BPbuf++) 
+  { 
+    *BPbuf = SPI_FLASH_SendByte(0);
+    if(!((++addr)&0xFF))  break;   
+  }  
+
+  AT25FXX_CS_HIGH();    
+}
+```
