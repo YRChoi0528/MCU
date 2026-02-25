@@ -17,9 +17,9 @@
 
 ### 1.2 핀 구성(SPI1 Master 기준)
 - **SCK(클럭)** : PA5 (Alternate Function Push-Pull 설정)
-- **MISO(Master In Slave Out) : PA6 (Input Floating 권장, 실습에서는 AF_PP로 설정.)
-- **MOSI(Master Out Slave In) : PA7 (Alternate Function Push-Pull 설정)
-- NSS/CS(Chip Select) : PA4 (하드웨어 NSS 대신 GPIO `Out_PP`로 설정하여 소프트웨어적으로 제어)
+- **MISO(Master In Slave Out)** : PA6 (Input Floating 권장, 실습에서는 AF_PP로 설정.)
+- **MOSI(Master Out Slave In)** : PA7 (Alternate Function Push-Pull 설정)
+- NSS/CS(Chip Select)** : PA4 (하드웨어 NSS 대신 GPIO `Out_PP`로 설정하여 소프트웨어적으로 제어)
 
 > MISO 핀은 외부 Slave가 Master로 신호를 보내는 핀이므로 Input_Floating 또는 Input Pull-Up 으로 설정하는 것을 권장한다.
 > STM32 하드웨어 특성상 Master 모드일 때 AF_PP로 설정해도 내부적으로 입력으로 우회되어 동작하기 때문에 실습 코드가 정상 작동하는 것이다.
@@ -37,7 +37,7 @@ SPI 모듈의 활성화, Master/Slave 모드, 클럭 극성 및 위상, 데이�
 |Bit[0]|CPHA|Clock Phase. <br> 데이터를 캡처하는 위상(`0`:첫 번째 엣지, `1`:두 번째 엣지)을 설정한다.|
 |Bit[1]|CPOL|Clock Polarity. <br> 대기 상태(Idle)일 때 클럭의 기본 상태(`0`:Low, `1`:High)를 설정한다.|
 |Bit[2]|MSTR|Master Selection. <br> `0`이면 Slave, `1`이면 Master 모드로 동작한다.|
-|Bit[5:3]|BR|Baud Rate Control. <br> 입력 클럭(APB2)을 분주하여 통신 속도를 결정한다. (예: `000` = fPCLK/8, `010` = fPCLK/8)|
+|Bit[5:3]|BR|Baud Rate Control. <br> 입력 클럭(APB2)을 분주하여 통신 속도를 결정한다. (예: `000` = fPCLK/2, `010` = fPCLK/8)|
 |Bit[6]|SPE|SPI Enable. <br> SPI 모듈의 전체 전원을 활성화한다.|
 |Bit[7]|LSBFIRST|`0`이면 MSB부터, `1`이면 LSB부터 전송한다.|
 |Bit[8]|SSI|Internal Slave Select. <br> SSM이 `1`일 때, 이 비트의 값이 실제 하드웨어 NSS 핀의 상태를 대신한다.|
@@ -46,7 +46,7 @@ SPI 모듈의 활성화, Master/Slave 모드, 클럭 극성 및 위상, 데이�
 |Bit[11]|DFF|Data Frame Format <br> `0`이면 8-bit, `1`이면 16-bit 프레임으로 설정한다.|
 |Bit[12]|CRCNEXT|다음 전송에 CRC 값 포함 여부 설정. <br> `0`: 일반 데이터 전송 단계, `1`: 다음 전송할 때 데이터 대신 CRC 값을 전송함.|
 |Bit[13]|CRCEN|하드웨어 CRC 계산 활성화 <br> `0`: CRC 계산 비활성화, `1`: 하드웨어 CRC 계산 활성화.|
-|Bit[14]|BIDIOE|1-Line 모드 시 출력 활성화(BIDIMODE=1일 떄만 유효). <br> `0`: 출력 비활성화(수신 전용), `1`: 출력 활성화(송신 전용).|
+|Bit[14]|BIDIOE|1-Line 모드 시 출력 활성화(BIDIMODE=1일 만 유효). <br> `0`: 출력 비활성화(수신 전용), `1`: 출력 활성화(송신 전용).|
 |Bit[15]|BIDIMODE| 1-Line 양방향 통신 모드를 설정. <br> `0`: 2-Line 단방향(MISO, MOSI 분리), `1`: 1-Line 양방향 데이터 모드.|
 
 ---
@@ -102,7 +102,7 @@ SPI는 **전이중(Full-Duplex)** 통신이므로, 송신 시 항상 수신 동�
 1. **송신 버퍼 확인** : `SPI_SR`에서 `TXE == 1`이 될 때까지 대기한다.
 2. **데이터 송신** : `SPI_DR`에 보낼 데이터를 기록한다. (이때 하드웨어가 자동으로 8개의 SCK 클럭을 발생시킨다)
 3. **수신 버퍼 확인** : `SPI_SR`에서 `RXNE=1`이 될 때까지 대기한다.
-4. **데이터 수신** : `SPI_DR`의 데이터를 읽어서 변환한다. (데이터를 읽으면 RXNE 플래그는 자동으로 클리어 된다)
+4. **데이터 수신** : `SPI_DR`의 데이터를 읽어서 반환한다. (데이터를 읽으면 RXNE 플래그는 자동으로 클리어 된다)
 
 ```c
 u8 SPI_FLASH_SendByte(u8 byte)
@@ -178,14 +178,14 @@ void SPI_Init(SPI_TypeDef* SPIx, SPI_InitTypeDef* SPI_InitStruct)
 
 - `SPI_Mode_Master` 및 `SPI_NSS_Soft` 설정으로 인해 CR1의 **MSTR(Bit[2])**, **SSM(Bit[9]**, **SSI(Bit[8])가 모두 1로 SET** 된다. 이는 외부 핀 상태와 무관하게 내부적으로 항상 자신을 안전한 Master로 인식하게 만드는 설정이다.
 - `SPI_CPOL_Low`, `SPI_CPHA_1Edge`에 의해 **CPOL(Bit[1])**, **CPHA(Bit[0])는 0으로 유지**되며, 이는 **SPI Mode 0**을 의미한다.
-- `SPI_BaudRatePresacler_32`에 의해 **BR(Bit[5:3])**에 분주비 값(`100`)이 들어가 통신 속도가 72MHz/32=2.25MHz로 설정된다.
+- `SPI_BaudRatePrescaler_32`에 의해 **BR(Bit[5:3])**에 분주비 값(`100`)이 들어가 통신 속도가 72MHz/32=2.25MHz로 설정된다.
 이후 `SPI_Cmd(SPI1, ENABLE)`함수를 호출하면 `CR1`의 `SPE(Bit[6])`가 **1로 SET**되면서 SPI 하드웨어가 작동을 시작한다.
 
 ---
 
 ## 8. AR25F512 플래시 메모리 동작 프로토콜
 
-실습에서 사용하는 플래시 메모리 칩(AT24F512)과 SPI 통신할 차례이다. </br> 플래시 메모리는 내부에 정의된 **8bit 명령어(Instruction Code)**를 수신해야만 지정된 동작을 수행한다.
+실습에서 사용하는 플래시 메모리 칩(AT25F512)과 SPI 통신할 차례이다. </br> 플래시 메모리는 내부에 정의된 **8bit 명령어(Instruction Code)**를 수신해야만 지정된 동작을 수행한다.
 
 |명령어 이름|Opcode (Hex)|동작 설명|
 |-----------|------------|---------|
@@ -203,7 +203,7 @@ void SPI_Init(SPI_TypeDef* SPIx, SPI_InitTypeDef* SPI_InitStruct)
 
 ### 9.1 메모리 초기화: `at25fxx_CHIP_ERASE()`
 
-플래시 메모리의 물리적 특성상, 데이터를 쓸 때 bit를 `1` 또는 `0`으로만 바꿀 수 있다. 따라서 덮어쓰기를 하려면 무조건 먼저 데이터를 지워서(Erase) 모든 bit를 `1`로 만들어야 한다.
+플래시 메모리의 물리적 특성상, 데이터를 쓸 때(Write) bit를 `1` 에서 `0`으로만 바꿀 수 있다. 따라서 덮어쓰기를 하려면 무조건 먼저 데이터를 지워서(Erase) 모든 bit를 `1`로 만들어야 한다.
 
 1. **잠금 해제** : `at25fxx_WREN()`을 호출하여 내부에 쓰기 권한을 얻는다(`0x06` 전송).
 2. **명령 전송** : CS를 Low로 내리고 `CHIP_ERASE(0x62)`명령을 전송한 다음 CS를 High로 올려 실제 동작을 수행시킨다.
@@ -247,7 +247,7 @@ void at25fxx_CHIP_ERASE(){
 
 1. **잠금 해제** : 쓰기 작업이므로 `at25fxx_WREN()`이 먼저 실행된다.
 2. **명령 및 주소 전송** : CS를 Low로 내리고 `PROGRAM(0x02)` 명령을 전송한다. 이후 24bit(3byte) 체계의 주소를 전송한다.
-3. **데이터 전송 및 종료** : 기록할 데이터 byte들을 연속으로 보낸 뒤, **CS를 High로 올려야만 내부적으로 실제 플래시 메로리에 기록이 시작**된다. 이후 `at25fxx_Ready()`로 작업이 끝날 때까지 대기한다.
+3. **데이터 전송 및 종료** : 기록할 데이터 byte들을 연속으로 보낸 뒤, **CS를 High로 올려야만 내부적으로 실제 플래시 메모리에 기록이 시작**된다. 이후 `at25fxx_Ready()`로 작업이 끝날 때까지 대기한다.
 
 
 ```c
@@ -264,7 +264,7 @@ void at25fxx_Write_Byte(u16 addr, u8 buf){
    */
   SPI_FLASH_SendByte(0);                 /* 최상위 8bit (사용하지 않으므로 더미 값 전송) */
   SPI_FLASH_SendByte((addr>>8) & 0xff);  /* 중간 8bit (입력받은 16bit 주소의 상위 byte) */
-  SPI_FLASH_SendByte((addr) & 0xff);     /* 최하위 8bit (입력받은 16bit 주소의 하위 byte*/
+  SPI_FLASH_SendByte((addr) & 0xff);     /* 최하위 8bit (입력받은 16bit 주소의 하위 byte) */
   SPI_FLASH_SendByte(buf);
 
   AT25FXX_CS_HIGH();
