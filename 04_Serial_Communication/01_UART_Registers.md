@@ -286,9 +286,9 @@ usart.c는 부동소수점(float) 연산으로 인한 메모리 및 성능 저�
 
 (1) 100배 스케일링을 통한 오차 없는 계산 (`integerdivider`)
 - `0x19`(25)를 곱하고 `0x04`(4)로 나누는 이유는 원래 공식에 100을 곱하여 소수점 손실을 막기 위함이다.
-$$100\times USARTDIV = \frac{100\timse f_{CK}}{16\times BaudRate}$$
+$$100\times USARTDIV = \frac{100\times f_{CK}}{16\times BaudRate}$$
 - 위 분수식을 약분하면 다음과 같이 변한다.
-$$100\times USARTDIV = \frac{25\timse f_{CK}}{4\times BaudRate}$$
+$$100\times USARTDIV = \frac{25\times f_{CK}}{4\times BaudRate}$$
 - 해당 연산을 통해 `integerdivider`변수에는 실제 USARTDIV의 100배 된 값이 소수점 잘림 없이 정수로 담긴다.
 
 ```c
