@@ -17,11 +17,11 @@ SHT11 센서는 I2C와 유사한 2선식(2-Wire) 인터페이스(SCK, SDA)를 �
 실제 통신을 주관하는 핵심 레지스터는 I2C가 아닌 **GPIO 제어 레지스터**이다.
 
 - **연결 핀**:
-- - `SHT11_SCK` : `PC0` (클럭 핀)
+  - `SHT11_SCK` : `PC0` (클럭 핀)
   - `SHT11_SDA` : `PC1` (데이터 핀)
 
 - **핵심 제어 레지스터 흐름**:
-- - **RCC_APB2ENR** : `RCC_APB2PeriphClockCmd(SHT11_DDR, ENABLE)`을 통해 GPIOC에 클럭을 공급하여 핀 제어를 활성화한다.
+  - **RCC_APB2ENR** : `RCC_APB2PeriphClockCmd(SHT11_DDR, ENABLE)`을 통해 GPIOC에 클럭을 공급하여 핀 제어를 활성화한다.
   - **GPIOC_CRL** : 통신 중 SDA(PC1) 핀의 방향을 실시간으로 변경한다.
   - - 데이터 송신 시 : `MAKE_I2CDATA_OUTPUT()` 매크로를 통해 Push-Pull 출력 모드로 변경.
     - 데이터 수신/ACK 대기 시 : `MAKE_I2CDATA_INPUT()` 매크로를 통해 Floating 입력 모드로 변경.
@@ -202,9 +202,9 @@ u8 s_read_byte(u8 ack)
 
 
 3. **연속 데이터 수신** : 
-- 첫 번째 데이터를 읽고, `ACK(1)`를 보내 다음 데이터를 요구한다.
-- 두 번째 데이터를 읽고, 다시 `ACK(1)`를 보내 체크섬을 요구한다.
-- 마지막 체크섬을 읽은 후에는 `noACK(0)`을 보내 수신을 완전히 종료하고 버스를 해제한다.
+  - 첫 번째 데이터를 읽고, `ACK(1)`를 보내 다음 데이터를 요구한다.
+  - 두 번째 데이터를 읽고, 다시 `ACK(1)`를 보내 체크섬을 요구한다.
+  - 마지막 체크섬을 읽은 후에는 `noACK(0)`을 보내 수신을 완전히 종료하고 버스를 해제한다.
 
 ```c
 u8 s_measure(u16 *p_value, u16 *p_checksum, u8 mode)
@@ -243,7 +243,7 @@ u8 s_measure(u16 *p_value, u16 *p_checksum, u8 mode)
 
 - **측정 대기(Measurement Wait)** : 명령을 받은 센서가 실제로 습도를 측정하는 동안 시간이 소요된다. 측정이 끝나면 센서가 스스로 SDA라인을 Low로 떨어뜨려 MCU에게 계산이 완료되었음을 알린다.
 - **데이터 수신(12 bit humidity data)** :
-- - MSB 수신 : SHT11이 12bit 습도 데이터 중 상위 8bit만 보낸다(상위 4bit는 `Low`로 고정). 수신 후 MCU가 Low로 당겨 다음 데이터를 요구하는 ACK를 보낸다.
+  - MSB 수신 : SHT11이 12bit 습도 데이터 중 상위 8bit만 보낸다(상위 4bit는 `Low`로 고정). 수신 후 MCU가 Low로 당겨 다음 데이터를 요구하는 ACK를 보낸다.
   - LSB 수신 : 이어서 하위 8bit 데이터가 들어오고, MCU는 다시 한 번 ACK를 보낸다.
 - **CRC-8 및 통신 종료(NACK)** : 마지막으로 오류 검증용 체크섬 1byte를 받는다. 이때 9번째 클럭에서 MCU는 **DATA 라인을 끌어내리지 않고 High 상태로 둔다**. 이를 통해 SHT11에게 통신 종료를 알리고 대기 상태로 만든다.
 
@@ -254,8 +254,8 @@ u8 s_measure(u16 *p_value, u16 *p_checksum, u8 mode)
 1. **초기화** : `initialize_sht11_hanback()`을 호출하여 `GPIOC` 클럭을 키고 `PC0`, `PC1`을 초기화 한다.
 
 2. **데이터 요청 및 수신** :
-- `get_sht11_hanback_data(TEMP)`와 `get_sht11_hanback_data(HUMI)`를 호출한다.
-- 함수 내부적으로 센서에 측정 명령을 보내고, 센서가 측정을 완료할 때까지 대기(Polling)한 뒤, 1byte 단위 데이터 수신 함수(`s_read_byte`)를 통해 순수 데이터를 가져온다.
+  - `get_sht11_hanback_data(TEMP)`와 `get_sht11_hanback_data(HUMI)`를 호출한다.
+  - 함수 내부적으로 센서에 측정 명령을 보내고, 센서가 측정을 완료할 때까지 대기(Polling)한 뒤, 1byte 단위 데이터 수신 함수(`s_read_byte`)를 통해 순수 데이터를 가져온다.
 
 3. **데이터 변환 및 출력** : 읽어온 Raw Data를 14bit/12bit 공식에 대입하여 실제 섭씨온도와 상대습도로 변환(`calc_sth11`)한 후 LCD에 출력한다.
 
