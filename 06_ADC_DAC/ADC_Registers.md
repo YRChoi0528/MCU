@@ -65,7 +65,7 @@ ADC의 전원, 캘리브레이션, 데이터 정렬 방식, 연속 변환 모드
 |--------|----|----|----|
 |SMPR1|Bit[23:0]|SMP17 ~ <br>SMP10|Channel 17 to 10 Sample Time Selection. <br> 채널 10부터 17까지 각 채널당 3bit씩 할당되어 샘플링 사이클을 결정한다.|
 |SMPR2|Bit[29:0]|SMP9 ~ <br>SMP0|Channel 9 to 0 Sample Time Selection. <br> 채널 0부터 9까지 각 채널당 3bit씩 할당되어 샘플링 사이클을 결정한다.|
-|공통|3bit 값|설정 사이클|"000: 1.5 cycles <br> 001: 7.5 cycles <br> 010: 13.5 cycles <br> 011: 28.5 cycles <br> 100: 41.5 cycles <br> 101: 55.5 cycles <br> 110: 71.5 cycles <br> 111: 239.5 cycles|
+|공통|3bit 값|설정 사이클|`000`: 1.5 cycles <br> `001`: 7.5 cycles <br> `010`: 13.5 cycles <br> `011`: 28.5 cycles <br> `100`: 41.5 cycles <br> `101`: 55.5 cycles <br> `110`: 71.5 cycles <br> `111`: 239.5 cycles|
 
 ---
 
