@@ -22,7 +22,7 @@ ADC의 성능을 결정짓는 가장 중요한 두 가지 요소는 **분해능(
 
 입력 받은 아날로그 신호 샘플을 디지털 데이터로 변환하는 데 걸리는 시간이다.
 
-![ADC_characteristics](ADC_characteristics.png)
+![ADC_characteristics](../images/ADC_characteristics.png)
 
 - 위 표는 STMicroelectronics의 공식 데이터시트이다.
 - 보통 초당 샘플링 속도(Sampling Rate)로 나타낸다.
