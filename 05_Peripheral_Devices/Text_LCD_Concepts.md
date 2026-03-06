@@ -1,4 +1,4 @@
-<img width="1033" height="407" alt="image" src="https://github.com/user-attachments/assets/d2c60a9a-555d-42dd-b835-84991145b328" /># Text_LCD_Concepts.md
+Text_LCD_Concepts.md
 
 ## 1. 요약
 
