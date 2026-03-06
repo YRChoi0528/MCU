@@ -34,7 +34,7 @@
 
 ### 4.1 1상 여자 방식
 
-![Step_Motor_1Phase_Excitation](Step_Motor_1Phase_Excitation.png)
+![Step_Motor_1Phase_Excitation](../images/Step_Motor_1Phase_Excitation.png)
 
 1개의 코일만을 차례대로 여자하는 구동 방식이다.
 
@@ -43,7 +43,7 @@
 
 ### 4.2 2상 여자 방식
 
-![Step_Motor_2Phase_Excitation](Step_Motor_2Phase_Excitation.png)
+![Step_Motor_2Phase_Excitation](../images/Step_Motor_2Phase_Excitation.png)
 
 인접한 2개의 코일을 동시에 여자하는 구동 방식이다.
 
@@ -52,7 +52,7 @@
 
 ### 4.3 1-2상 여자 방식
 
-![Step_Motor_1_2Phase_Excitation](Step_Motor_1_2Phase_Excitation.png)
+![Step_Motor_1_2Phase_Excitation](../images/Step_Motor_1_2Phase_Excitation.png)
 
 1상 여자와 2상 여자를 교대로 수행하여 하나의 상과 두 개의 상에 교대로 전류를 흐르게 하는 방식이다.
 
