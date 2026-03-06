@@ -37,7 +37,7 @@
 ### 3.2 메모리 영역
 - **CGROM (Character Generator ROM)** : 영문자, 숫자, 기호 등에 대한 도트 패턴이 영구적으로 저장되어 있는 읽기 전용 메모리이다.
 - **CGRAM (Character Generator RAM)** : 사용자가 원하는 특수 문자(커스텀 폰트)를 직접 만들어 저장할 수 있는 읽기/쓰기 메모리이다.
-- **DDRAM (Display Data RAM)** : 화면에 표시할 문자의 ASCII 코드 값을 저장하는 메모리이다. 16×2 LCD의 경우 1행은 `0x00`~`0x0F`, 2행은 `0x40`~`0x4F`의 주소가 매핑되어 있다.
+- **DDRAM (Display Data RAM)** : 화면에 표시할 문자의 ASCII 코드 값을 저장하는 메모리이다. 16×2 LCD의 경우 1행은 `0x00`-`0x0F`, 2행은 `0x40`-`0x4F`의 주소가 매핑되어 있다.
 
 ![LCD_DDRAM_address](../images/LCD_DDRAM_address.png)
 > 숫자 뒤에 'H'(예: `00H`, `40H`)를 붙이는 것은 해당 숫자가 10진수가 아니라 16진수 체계로 표기되었음을 나타내는 표현 방식이다.
