@@ -1,4 +1,4 @@
-# Text_LCD_Concepts.md
+<img width="1033" height="407" alt="image" src="https://github.com/user-attachments/assets/d2c60a9a-555d-42dd-b835-84991145b328" /># Text_LCD_Concepts.md
 
 ## 1. 요약
 
@@ -51,35 +51,35 @@
 ![LCD_Instruction_Table](../images/LCD_Instruction_Table.png)
 
 - **Clear Display**
->> 전체 화면을 지우고 AC를 DDRAM Address 0으로 하여 커서를 Home(0x00) 위치로 이동 시킨다.
+  > 전체 화면을 지우고 AC를 DDRAM Address 0으로 하여 커서를 Home(0x00) 위치로 이동 시킨다.
 
 - **Return Home**
->> DDRAM의 내용은 변경하지 않고 커서만을 Home 위치로 이동 시킨다.
+  > DDRAM의 내용은 변경하지 않고 커서만을 Home 위치로 이동 시킨다.
 
 - **Entry Mode Set**
->> 데이터를 Read하거나 Write할 경우에 커서의 위치를 증가시킬 것인가(I/D=1) 감소 시킬 것인가(I/D=0)를 결정하며, 또 이때 화면을 시프트 할 것인지(S=1) 아닌지(S=0)를 결정한다.
+  > 데이터를 Read하거나 Write할 경우에 커서의 위치를 증가시킬 것인가(I/D=1) 감소 시킬 것인가(I/D=0)를 결정하며, 또 이때 화면을 시프트 할 것인지(S=1) 아닌지(S=0)를 결정한다.
 
 - **Display ON/OFF Control**
->> 화면 표시를 ON/OFF 하거나(D) 커서를 ON/OFF하거나(C) 커서를 깜박이게 할 것인지(B)의 여부를 지정 한다.
+  > 화면 표시를 ON/OFF 하거나(D) 커서를 ON/OFF하거나(C) 커서를 깜박이게 할 것인지(B)의 여부를 지정 한다.
 
 - **Cursor or Display Shift**
->> 화면(S/C=1) 또는 커서(S/C=0)를 오른쪽(R/L=1) 또는 왼쪽(R/L=0)으로 시프트 한다.
+  > 화면(S/C=1) 또는 커서(S/C=0)를 오른쪽(R/L=1) 또는 왼쪽(R/L=0)으로 시프트 한다.
 
 - **Function Set**
->> 인터페이스에서 데이터의 길이를 8bit(DL=1) 또는 4bit(DL=0)로 지정하고, 화면 표시 행수를 2행(N=1) 또는 1행(N=0)으로 지정하며, 문자의 폰트를 5x10 도트(F=1) 또는 5x8 도트(F=0)로 지정할 수 있다. 
->> 4bit로 인터페이스 할 경우에는 DB4~DB7을 사용하며, 상위 4bit를 먼저 전송하고 다음에 하위 4bit를 전송해야 한다.
+  > 인터페이스에서 데이터의 길이를 8bit(DL=1) 또는 4bit(DL=0)로 지정하고, 화면 표시 행수를 2행(N=1) 또는 1행(N=0)으로 지정하며, 문자의 폰트를 5x10 도트(F=1) 또는 5x8 도트(F=0)로 지정할 수 있다. <br>
+  4bit로 인터페이스 할 경우에는 DB4~DB7을 사용하며, 상위 4bit를 먼저 전송하고 다음에 하위 4bit를 전송해야 한다.
 
 - **Set CG RAM Address**
->> CGRAM의 어드레스를 지정한다. 이후에 송수신하는 데이터는 CGRAM의 데이터이다.
+  > CGRAM의 어드레스를 지정한다. 이후에 송수신하는 데이터는 CGRAM의 데이터이다.
 
 - **Set DD RAM Address**
->> DDRAM의 어드레스를 지정한다. 이후에 송수신하는 데이터는 DDRAM의 데이터이다.
+  > DDRAM의 어드레스를 지정한다. 이후에 송수신하는 데이터는 DDRAM의 데이터이다.
 
 - **Read Busy Flag & Address**
->> LCD 모듈이 내부 동작중임을 나타내는 BF 및 AC의 내용을 Read한다. LCD 모듈이 각 명령을 실행하는데 지정된 시간이 필요하므로 MCU는 BF를 읽어 1일 경우에는 기다리고 0일 경우 다음 명령을 보낸다.
+  > LCD 모듈이 내부 동작중임을 나타내는 BF 및 AC의 내용을 Read한다. LCD 모듈이 각 명령을 실행하는데 지정된 시간이 필요하므로 MCU는 BF를 읽어 1일 경우에는 기다리고 0일 경우 다음 명령을 보낸다.
 
 - **Write Data to CG RAM**
->> CGRAM 또는 DDRAM에 데이터를 쓴다.
+  > CGRAM 또는 DDRAM에 데이터를 쓴다.
 
 - **Read Data From CG/DD RAM**
->> CGRAM 또는 DDRAM에 데이터를 읽는다.
+  > CGRAM 또는 DDRAM에 데이터를 읽는다.
