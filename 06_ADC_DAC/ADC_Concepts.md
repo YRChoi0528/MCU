@@ -1,4 +1,4 @@
-# ADC Concepts (Analog-to-Digital Converter)
+# ADC_Concepts.md
 
 ## 1. 요약
 
