@@ -1,4 +1,4 @@
-# ADC Registers
+# ADC_Registers.md
 
 ## 1. 요약
 
