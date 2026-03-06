@@ -1,4 +1,4 @@
-Text_LCD_Concepts.md
+# Text_LCD_Concepts.md
 
 ## 1. 요약
 
