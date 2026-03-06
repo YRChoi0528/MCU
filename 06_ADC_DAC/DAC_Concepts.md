@@ -1,4 +1,4 @@
-# DAC Concepts (Digital-to-Analog Converter)
+# DAC_Concepts.md
 
 ## 1. 요약
 
