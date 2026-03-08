@@ -81,7 +81,7 @@ GPIO는 설정에 따라 크게 다음과 같은 모드로 나뉜다.
 - **동작원리**: 전력 소모를 줄이고 디지털 노이즈 간섭을 막기 위해 **Input Driver의 Pull-Up/Pull-Down 저항** 그리고 **슈미트 트리거(Schmitt Trigger)**를 비활성화한다.
 - **특징**:
   - 외부의 미세한 전압 변화를 측정할 때 사용한다.
-  - **입력 데이터 레지스터(IDR, Input Data Register)**를 통해 값을 읽을 수 없으며, 반드시 ADC 주변장치를 거쳐야 한다.
+  - **입력 데이터 레지스터(IDR, Input Data Register)** 를 통해 값을 읽을 수 없으며, 반드시 ADC 주변장치를 거쳐야 한다.
 
 ### 5.2 Floating Input
 Input Driver의 Pull-Up/Pull-Down 저항을 모두 비활성화 하고 핀을 공중에 띄워둔(Floating) 상태이다.
