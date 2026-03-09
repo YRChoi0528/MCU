@@ -274,7 +274,7 @@ tmpreg |= USART_InitStruct->USART_HardwareFlowControl;
 
 USARTx->CR3 = (u16)tmpreg;
 ```
-- **결과**: `HardwareFlowControl_None (0x0000)`으로 설정했으므로, Bit[9]dhk Bit[8]은 `0`으로 유지된다.
+- **결과**: `HardwareFlowControl_None (0x0000)`으로 설정했으므로, Bit[9]와 Bit[8]은 `0`으로 유지된다.
 
 ---
 
