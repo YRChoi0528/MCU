@@ -9,6 +9,7 @@
  * 2. 하드웨어가 데이터를 시프트 레지스터로 옮겨 전송을 시작한다.
  * 3. TXE(Transmit Data Register Empty) 플래그가 SET(1)이 될 때까지 while문에서 무한 대기한다.
  * - TXE가 1이 되었다는 것은 "버퍼가 비워졌으니 다음 데이터를 써도 좋다"는 의미이다.
+ * (값을 쓰는 순간 하드웨어가 자동으로 TXE 플래그를 0으로 클리어한다.)
  */
 void putch(unsigned char c){
   USART_SendData(USART1, c);
