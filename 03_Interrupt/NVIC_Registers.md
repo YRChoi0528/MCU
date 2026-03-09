@@ -42,7 +42,7 @@ typedef struct
 
 ## 2. NVIC_InitTypeDef 구조체
 
-`NVIC_Init()`은 사용자가 채운 구조체를 기반으로, 내부적으로 **IPR(우선순위) + ISER/ICER(Enable/Disable)**를 갱신한다.
+`NVIC_Init()`은 사용자가 채운 구조체를 기반으로, 내부적으로 **IPR(우선순위) + ISER/ICER(Enable/Disable)** 를 갱신한다.
 
 ```c
 typedef struct
