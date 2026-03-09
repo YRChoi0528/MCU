@@ -74,8 +74,6 @@ int main(void){
    * Preload 활성화
    * TIM_OC1PreloadConfig(TIM3, TIM_OCPreload_Enable); → TIM3.CCMR1 의 OC1PE(Output Compare 1 Preload Enable) 비트 1로 설정 → CCR 값 변경이 다음 업데이트 이벤트 때 반영
    * TIM_ARRPreloadConfig(TIM3, ENABLE); → TIM3.CR1 의 ARPE(Auto-Reload Preload Enable) 비트 1로 설정 → ARR 변경 시 다음 업데이트 이벤트 때 반영
-   * Update 이벤트 시점에 shadow -> active로 반영되어 글리치 감소
-     (강의자료에서도 preload/ARPE 사용을 요구하는 내용이 있음) :contentReference[oaicite:0]{index=0}
    */
   TIM_OC1PreloadConfig(TIM3, TIM_OCPreload_Enable); 
   TIM_ARRPreloadConfig(TIM3, ENABLE);
