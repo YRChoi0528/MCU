@@ -11,7 +11,7 @@
   /* M, PCE, PS, TE, RE bits 클리어 */
   tmpreg &= CR1_CLEAR_Mask;
 
-  /* USART 데이터 길이, 패리티, 모드 설정 ----------------------- */
+  /* USART 데이터 길이, 패리티, 모드 설정 */
   tmpreg |= (u32)USART_InitStruct->USART_WordLength | USART_InitStruct->USART_Parity |
             USART_InitStruct->USART_Mode;
             
@@ -24,7 +24,7 @@
    */
   tmpreg |= 0x0020; 
 
-  /* Write to USART CR1 */
+  /* USART CR1 설정값 쓰기 */
   USARTx->CR1 = (u16)tmpreg;
 
 /* ... (생략) ... */
