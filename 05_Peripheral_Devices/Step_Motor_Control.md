@@ -36,8 +36,8 @@ unsigned char mot_tbl[] = {0x01, 0x03, 0x02, 0x06, 0x04, 0x0C, 0x08, 0x09};
 
 ### 4.1 GPIO 및 타이머 초기화
 
-- `GPIOA`는 LED 출력을 위한 Push-Pull 모드로 설정되며, `GPIOC`의 하위 4bit(`Pin_0-3`)는 스텝 모터 여자 신호 출력을 위해 설정된다.
-- `TIM_init()` 함수는 TIM3를 구동 클럭 10kHz(Prescaler 7199), 주기 1ms(Period 9)로 설정하여 폴링 방식의 `delay_ms()` 딜레이 함수를 구현한다.
+- `GPIOA`는 LED 출력을 위한 Push-Pull 모드로 설정되며, `GPIOC`의 하위 4bit(`Pin0-3`)는 스텝 모터 여자 신호 출력을 위해 설정된다.
+- `TIM_init()` 함수는 TIM3를 구동 클럭 10kHz(Prescaler=7200-1), 주기 1ms(Period=10-1)로 설정하여 폴링 방식의 `delay_ms()` 딜레이 함수를 구현한다.
 
 ### 4.2 외부 인터럽트 설정 및 처리
 - `INT_init()` 함수를 통해 `PC5` 핀을 Floating Input 모드로 설정하고, 하강 에지(Falling Edge)에서 인터럽트(EXTI_Line5)가 발생하도록 구성한다.
