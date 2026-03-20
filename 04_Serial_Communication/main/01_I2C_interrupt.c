@@ -11,7 +11,7 @@
 /**************** lib_sensor.c ****************/
 
 /* 상태를 기억할 전역 변수 선언 */
-volatile u8 acq_complete = 0;     /* 측정 완료 플래 */
+volatile u8 acq_complete = 0;     /* 측정 완료 플래그 */
 volatile u8 current_mode = TEMP;  /* 현재 측정 중인 대상 */
 volatile u16 raw_temp /* 온도 순수 데이터 */
 volatile u16 raw_humi /* 습도 순수 데이터 */
