@@ -1,4 +1,4 @@
-# Step_Motor_Control.md
+# Step Motor Control.md
 
 ## 1. 요약
 
