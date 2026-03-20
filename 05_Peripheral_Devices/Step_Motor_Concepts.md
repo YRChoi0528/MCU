@@ -1,4 +1,4 @@
-# Step_Motor_Concepts.md
+# Step Motor Concepts.md
 
 ## 1. 요약
 
