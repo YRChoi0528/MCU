@@ -49,7 +49,7 @@ int main(void){
      
   /*
    * 12MHz 클럭 속도에 55.5 Cycles 설정 시 샘플링 타임은 
-   * 1/12,000,000 * (55.5 + 12.5) ≒ 약 5.67μs가 된다.
+   * 1/12,000,000 * (55.5 + 12.5) ≒ 5.67μs가 된다.
    */
   ADC_RegularChannelConfig(ADC1, ADC_Channel_0, 1, ADC_SampleTime_55Cycles5);
 
