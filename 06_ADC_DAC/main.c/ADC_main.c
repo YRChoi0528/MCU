@@ -33,7 +33,6 @@ int main(void){
   
   /* 
    * STM32F10x 규격 상 ADC 최대 클럭은 14MHz이다.
-   * 시스템 클럭(PCLK2) 72MHz 기준, 기존 Div2(36MHz)는 심각한 오버클럭이다.
    * 이를 Div6으로 수정하여 12MHz의 안정적인 동작 클럭을 확보한다.
    */
   RCC_ADCCLKConfig(RCC_PCLK2_Div6); 
