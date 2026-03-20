@@ -1,4 +1,4 @@
-# Text_LCD_Control.md
+# Text LCD Control.md
 
 ## 1. 요약
 
