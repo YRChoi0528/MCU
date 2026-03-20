@@ -1,4 +1,4 @@
-<img width="645" height="756" alt="image" src="https://github.com/user-attachments/assets/61dbb47f-da52-4af7-9cb0-332a375cb0bb" /># Text_LCD_Control.md
+# Text_LCD_Control.md
 
 ## 1. 요약
 
