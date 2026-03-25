@@ -16,7 +16,7 @@ volatile u8 current_mode = TEMP;  /* 현재 측정 중인 대상 */
 volatile u16 raw_temp /* 온도 순수 데이터 */
 volatile u16 raw_humi /* 습도 순수 데이터 */
 
-/* STEP 1. CPU가 SHT11에게 측정 지시만 하고 바로 빠져나오는 함수(main.c에서 호출) */
+/* 인터럽트 방식 */
 u8 sht11_start_measure_IT(u8 mode)
 {
   unsigned short error = 0;
@@ -43,7 +43,7 @@ u8 sht11_start_measure_IT(u8 mode)
 /* STEP 2. 센서가 SDA라인을 0으로 내렸을 때(인터럽트 발생) 실행될 함수(it.c에서 호출) */
 void sht11_read_data_ISR(void)
 {
-  u16 raw_value, checksum;
+  u16 raw_value;
 
   /* 데이터를 읽는 동안 다시 인터럽트가 걸리지 않도록 즉시 비활성화 한다. */
   EXTI -> IMR &= ~EXTI_Line1; /* EXTI1 인터럽트 비활성화 */
@@ -65,7 +65,7 @@ void sht11_read_data_ISR(void)
 u16 get_calculated_sht11_data(u8 type)
 {
   calc_sht11(raw_humi, raw_temp);
-
+  
   if(type == TEMP) return mytemp;
   else if(type == HUMI) return myhumi;
   else return 0;
@@ -74,10 +74,95 @@ u16 get_calculated_sht11_data(u8 type)
 
 /******************* main.c *******************/
 #include "stm32f10x_lib.h"
+#include "System_func.h"
 #include "lib_sensor.h"
+#include "user_delay.h"
 
-/* EXTI 설정 함수 */
-void EXTI1_Config(void) 
+void print_data(char* str, u16 data);
+void INT_init(void);
+
+extern u8 acq_complete; /* 센서 라이브러리에서 갱신하는 측정 완료 플래그 */
+
+int main(void)
+{
+  GPIO_InitTypeDef GPIO_InitStructure;
+  
+  Init_STM32F103();
+  initialize_sht11_hanback();
+  INT_init();
+  lcdInit();
+  TIM_init();
+
+  /* 
+   * 상태 머신 변수 
+   * 0: 온도 측정 명령, 
+   * 1: 온도 측정 완료 대기, 
+   * 2: 습도 측정 명령, 
+   * 3: 습도 측정 완료 대기 및 LCD 출력
+   */
+  u8 step = 0
+
+  /* 주기 제어용 카운터 (10ms x 100 = 약 1초) */
+  u8 calc_state=0;
+
+  /* LCD 표시용 임시 저장 변수 */
+  u16 temp, humi;
+  
+  /* 1-2상 STEP Motor 구동 테이블(0~3번 핀 기준) */
+  u8 motor_tbl[] = {0x01, 0x03, 0x02, 0x06, 0x04, 0x0C, 0x08, 0x09};
+  u8 index = 0;
+  
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
+  
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+  GPIO_Init(GPIOC, &GPIO_InitStructure);
+    
+  while(1) {
+    GPIO_ResetBits(GPIOC, GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5);     
+    GPIO_SetBits(GPIOC, motor_tbl[index]<<2);
+    if(index == 7) index=0;
+    else index++;
+    
+    if(calc_state == 100){ /* 1초마다 1 STEP씩 실행되므로 4초마다 값이 업데이트 된다. */
+      calc_state=0;
+      switch(step)
+      {
+        /* 온도 측정 시작 */
+        case 0: if(sht11_start_measure_IT(TEMP) == 0) step = 1; break;
+
+        /* 온도 측정 완료 대기 */
+        case 1: if(acq_complete == 1) {acq_complete = 0; step = 2;} break;
+
+        /* 습도 측정 시작 */
+        case 2: if(sht11_start_measure_IT(HUMI) == 0) {acq_complete = 0; step = 3;} break;
+
+        /* 습도 측정 완료 후 온/습도 계산값 출력 */
+        case 3:
+          if(acq_complete == 1)
+          {
+            temp = get_calculated_sht11_data(TEMP);
+            humi = get_calculated_sht11_data(HUMI);
+            
+            lcdGotoXY(0,0);
+            print_data("Temp: ",temp); /* LCD에 측정한 온도 출력 */
+            lcdDataWrite('C');
+            lcdGotoXY(0,1);
+            print_data("Humi: ",humi); /* LCD에 측정한 습도 출력 */
+            lcdDataWrite('%');
+            step = 0;
+          }
+          break;
+      }
+    }
+    else calc_state++;
+    delay_ms(10);
+  }
+}
+
+
+void INT_init(void) 
 {
   EXTI_InitTypeDef EXTI_InitStructure;
   NVIC_InitTypeDef NVIC_InitStructure;
@@ -89,51 +174,28 @@ void EXTI1_Config(void)
   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStructure);
-  
+
+  /* PC1 핀을 EXTI1 라인에 연결 */
   GPIO_EXTILineConfig(GPIO_PortSourceGPIOC, GPIO_PinSource1);
     
   /* EXTI 초기화 (Falling Edge 설정) */
   EXTI_InitStructure.EXTI_Line = EXTI_Line1;
   EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-  EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling; // 1 → 0으로 떨어질 때
+  EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling; /* SDA가 1 -> 0으로 떨어질 때 인터럽트 발생 */
   EXTI_InitStructure.EXTI_LineCmd = ENABLE;
   EXTI_Init(&EXTI_InitStructure);  
 
-  /* 시작 시점에는 통신 중 오작동을 막기 위해 EXTI1을 잠시 끈다. */
+  /* 평소에는 꺼 두고, 측정 명령 전송이 끝난 후에만 다시 켠다 */
   EXTI -> IMR &= ~EXTI_Line1;
 }
 
-int main(void)
-{
-  Init_STM32F103();
-  initialize_sht11_hanback();
-  EXTI1_Config();
-
-  /* --- 생략 --- */
-
-  u8 step = 0; /* 상태 머신 변수 (0: 온도 명령, 1: 온도 대기, 2: 습도 명령, 3: 습도 대기) */
-  u16 temp, humi;
-  while(1)
-  {
-    Run_Motor(); /* 모터 구동 코드(가정) */
-
-    switch(step)
-    {
-      case 0: if(sht11_start_measure_IT(TEMP) == 0) step = 1; break;
-      case 1: if(acq_complete == 1) acq_complete = 0; step = 2; break;
-      case 2: if(sht11_start_measure_IT(HUMI) == 0) acq_complete = 0; step = 3; break;
-      case 3:
-        if(acq_complete == 1)
-        {
-          temp = get_calculated_sht11_data(TEMP);
-          humi = get_calculated_sht11_data(HUMI);
-
-          Print_To_LCD(temp, humi); /* LCD에 측정한 온/습도 출력해주는 코드(가정) */
-          step = 0;
-        }
-        break;
-    }
-  }
+/* 예: 253 -> "25.3" 형태로 LCD에 출력 */
+void print_data(char* str, u16 data){
+   lcdPrint(str);
+   lcdDataWrite(data/100 + '0');
+   lcdDataWrite((data/10)%10 + '0');
+   lcdDataWrite('.');
+   lcdDataWrite((data)%10 + '0');
 }
 
 /******************** it.c ********************/
