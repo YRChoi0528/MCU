@@ -128,24 +128,28 @@ u8 s_write_byte(u8 value)
 { 
   u8 i,error=0;
   MAKE_I2CDATA_OUTPUT();
-
-  for (i=0x80;i>0;i/=2)
+  
+  for (i=0x80;i>0;i/=2)             /* 1byte의 MSB부터 LSB까지 1bit씩 확인 */
   {
-    if (i & value) SETDATA();
-    else CLRDATA();                        
-    SETSCK();                
-    asm("nop");asm("nop");   
+    if (i & value) SETDATA();       /* 해당 bit가 1이면 DATA Line High */
+    else CLRDATA();                 /* 해당 bit가 0이면 DATA Line Low */      
+
+    SETSCK();                       /* 클락신호에 맞춰 명령을 SHT11로 전송 */
+    asm("nop");asm("nop");          /* asm("nop")은 펄스를 만들기 위해 사용 */ 	
     CLRSCK();
   }
-
-  /* 8bit 전송 후 */
-  SETDATA(); /* ACK를 확인하기 위해 SDA 라인을 High 상태로 만든다. */
-  MAKE_I2CDATA_INPUT(); /* SDA라인의 제어권을 SHT11에게 넘겨주기 위해서 Floating 모드로 변경 */
+  SETDATA();                        /* ACK를 확인하기 위해 SDA Line High로 변경 */
+  MAKE_I2CDATA_INPUT();             /* SDA Line의 제어권을 센서에게 넘겨주기 위해 IN_FLOATING으로 변경 */
+  
+  asm("nop");asm("nop");            /* IN_FLOATING으로 변경하고 Low로 당기는 시간 보장 */
+  SETSCK();                         /* 9번째 클럭 */
   asm("nop");asm("nop");
-  SETSCK();          /* 9번째 클럭 */
-  error=READDATA();  /* SHT11이 데이터를 잘 받았으면 SDA 라인을 Low로 끌어내린다(ACK) */
+  error=READDATA();                 /* 센서가 데이터를 잘 받았으면 SDA Line을 Low로 당긴다(Check ACK). */ 
   CLRSCK();
-  MAKE_I2CDATA_OUTPUT(); /* ACK 확인 후 SDA라인을 출력 모드로 변경 */
+  asm("nop");asm("nop");
+
+  MAKE_I2CDATA_OUTPUT();            /* ACK 확인 후 SDA라인을 출력 모드로 변경 */
+  SETDATA();                        /* SDA라인의 기본 대기 상태는 High */ 
   return error;
 }
 ```
@@ -163,32 +167,32 @@ u8 s_write_byte(u8 value)
 u8 s_read_byte(u8 ack)
 { 
   u8 i,val=0;
-
-  MAKE_I2CDATA_INPUT();
-  SETDATA();
+  MAKE_I2CDATA_INPUT();       /* 값을 읽어와야 하므로 제어권을 센서에게 넘김 */
   asm("nop");asm("nop");
-
-  for (i=0x80;i>0;i/=2)
-  {
-    SETSCK();
+  
+  for (i=0x80;i>0;i/=2)             
+  { 
+    SETSCK();                       
     asm("nop");asm("nop");
-    if (READDATA()) val=(val | i); /* MSB부터 1bit씩 핀 상태를 읽어오며, High(1)일 경우 OR 연산(|)을 통해 'val' 변수의 해당 자리를 1로 설정한다. */
+    if (READDATA()) val=(val | i); /* 클락에 맞춰 MSB부터 1bit씩 값을 val에 기록한다. */
     CLRSCK();
     asm("nop");asm("nop");					 
   }
+  
+  /* 1byte 전송 후 */
+  MAKE_I2CDATA_OUTPUT(); 
+  if(ack) CLRDATA();  /* SDA 라인을 Low로 하여, SHT11은 ACK로 받아들이고 다음 데이터를 보낼 준비를 함. */
+  else SETDATA();     /* SDA 라인을 High로 하여, SHT11은 NACK로 받아들이고 송신을 완전히 중단함. */
 
-  /* 8bit 전송 후 */
-  MAKE_I2CDATA_OUTPUT();
-  if(ack) CLRDATA(); /* SDA라인을 Low로 하여, SHT11은 ACK로 받아들여, 다음 데이터를 보낼 준비를 한다. */
-  else SETDATA();    /* SDA라인을 High로 하여, SHT11은 NACK로 받아들여, 송신을 완전 중단한다. */
-  SETSCK();   /* 9번째 클럭 */
-  asm("nop");asm("nop");
+  SETSCK();           /* 9번째 클럭 */                 
+  asm("nop");asm("nop");          
   CLRSCK();
   asm("nop");asm("nop");					    
-  SETDATA(); /* SDA라인의 기본 대기 상태는 High이므로, 모든 송신이 끝나면 SETDATA()를 해줘야 한다. */
-
+  SETDATA();
+  
   return val;
 }
+
 ```
 
 ### 2.4 센서 측정
@@ -212,24 +216,27 @@ u8 s_measure(u16 *p_value, u16 *p_checksum, u8 mode)
   unsigned short error=0;
   u16 sht11_msb, sht11_lsb;
 
-  s_transstart();
-  switch(mode){
-    case TEMP	: error+=s_write_byte(MEASURE_TEMP); break;
-    case HUMI	: error+=s_write_byte(MEASURE_HUMI); break;
-    default   : break;	 
+  s_transstart(); /* 센서와 통신 시작 신호 전송 */
+  switch(mode){                     
+    case TEMP	: error+=s_write_byte(MEASURE_TEMP); break; /* 온도 측정 명령 전송 */
+    case HUMI	: error+=s_write_byte(MEASURE_HUMI); break; /* 습도 측정 명령 전송 */
+    default     : break;	 
   }
   if(error != 0){return error;}
   
   MAKE_I2CDATA_INPUT();
-  while(1){ sht11_delay(500); if(READ_I2CDATA_PIN() == 0) break; } /* SHT11이 측정한 온/습도를 아날로그에서 디지털로 변환하는 시간을 기다려주는 대기열이다(폴링 방식). 계산이 다 끝나면 SDA라인을 Low로 당긴다. */
+
+  /* SHT11이 측정한 온/습도를 아날로그에서 디지털로 변환하는 동안 대기(Polling) */
+  while(1){ sht11_delay(500); if(READ_I2CDATA_PIN() == 0) break; }
   
   MAKE_I2CDATA_INPUT();
-
-  /* 센서의 측정값은 14bit/12bit 길이이므로, 한 번에 8bit씩 두 번에 걸쳐서 받아와야 한다. */
-  sht11_msb = s_read_byte(ACK);    /* 상위 8bit */
-  sht11_lsb = s_read_byte(ACK);    /* 하위 8bit */
+  
+  /* 센서의 측정값은 14/12bit 길이이므로, 한 번에 8bit씩 두 번 걸쳐서 빋아야 함.*/
+  sht11_msb = s_read_byte(ACK);     /* 상위 8bit */
+  sht11_lsb = s_read_byte(ACK);     /* 하위 8bit */
   *p_value = (sht11_msb * 256) + sht11_lsb;
-  *p_checksum = s_read_byte(noACK);  /* 오류 확인하기 위한 검증용 1byte, noACK를 넘겨주어, SDA라인을 High로 방치하여 SHT11에게 통신이 종료됐음을 알림. */
+  *p_checksum =s_read_byte(noACK);  /* 오류 확인하기 위한 검증용 */
+  acq_complete = false;
   return error;
 }
 ```
