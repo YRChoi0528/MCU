@@ -2,7 +2,7 @@
 #include "System_func.h"
 
 /* 함수 선언 */
-void Timer_Delay_init(void);
+void TIM_init(void);
 void delay_ms(u16 time);
 
 int main(void){
@@ -92,7 +92,7 @@ int main(void){
   }
 }
 
-void Timer_Delay_init(){
+void TIM_init(){
   TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct;
   
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
