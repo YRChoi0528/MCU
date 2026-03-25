@@ -100,12 +100,9 @@ int main(void){
      * CCR1 값의 변경으로 PA6핀과 연결된 LED는 깜박이는 속도가 달라진다. 
      * 하지만 인간의 눈으로는 위와 같은 속도의 깜빡임은 인지하지 못하고 평균적인 밝기만 인지하게 되어서 CCR1=10 일 때는 LED가 어둡고, CCR1=500 일 때는 LED가 밝게 보인다.
      */
-    // TIM_Cmd(TIM3, DISABLE);
-
+    
     /* CCR1 값 변경(듀티 변경) */
     TIM_SetCompare1(TIM3, CCR1_Val);
-
-    // TIM_Cmd(TIM3, ENABLE);
 
     /* 듀티를 점진적으로 증가시켜 밝기 변화(LED가 PWM에 연결되어 있다고 가정) */
     CCR1_Val += 5;
