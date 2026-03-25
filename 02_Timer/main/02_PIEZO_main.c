@@ -76,7 +76,7 @@ int main(void){
     STOP_FREQ();
 
     /* 키 입력이 들어올 때까지 대기 */
-    while((GPIO_ReadInputData(GPIOC) & 0x00FF) == 0);
+    while(!(GPIO_ReadInputData(GPIOC) & 0x00FF));
 
     /* 입력 포트의 하위 8비트를 읽어 어떤 키가 눌렸는지 확인 */
     key_vlaue = GPIO_ReadInputData(GPIOC) & 0x00FF;
@@ -88,7 +88,7 @@ int main(void){
     Change_FREQ(freq_value);
 
     /* 키가 떼어질 때까지 대기 */
-    while((GPIO_ReadInputData(GPIOC) & 0x00FF) == 1);
+    while(GPIO_ReadInputData(GPIOC) & 0x00FF);
   }
 }
 
@@ -137,6 +137,10 @@ void Change_FREQ(unsigned int freq){
 
   /* CCR1(듀티) 설정: 50% */
   TIM_SetCompare1(TIM3, (unsigned int)(tmp / 2));
+
+  TIM_GenerateEvent(TIM3, TIM_EventSource_Update); /* 이벤트를 발생하여 설정한 ARR, CCR 값을 바로 업데이트한다.*/
+  TIM_SetCounter(TIM3, 0); /* 이후 CNT 초기화 해서 처음부터 시작 */
+  TIM_Cmd(TIM3, ENABLE);
 }
 
 /*
