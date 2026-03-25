@@ -1,6 +1,5 @@
 #include "stm32f10x_lib.h"
 #include "System_func.h"
-#include "user_delay.h"
 
 /* 제어 핀 및 포트 매크로 정의 (직렬 DAC081S101) */
 #define DIN  GPIO_Pin_0  /* 직렬 데이터 입력 핀 */
@@ -13,6 +12,8 @@
 /* 함수 선언 */
 void init_S_DAC(void);                   /* Serial DAC 통신 핀 초기화 */
 void Convert_sDAC(unsigned char value);  /* 16bit 프레임 전송 및 DAC 변환 제어 */
+void TIM_init();
+void delay_ms(u16 time);
 
 int main(void){
 
@@ -20,7 +21,7 @@ int main(void){
 
   unsigned char VolC = 0x00;
   
-  Timer3_Delay_init();
+  TIM_init();
   
   /* 직렬 DAC 제어용 GPIO 초기화 */
   init_S_DAC();
@@ -93,4 +94,26 @@ void Convert_sDAC(unsigned char value){
    
     data<<=1; /* 다음 bit 전송을 위해 데이터를 좌측으로 1bit 시프트 */
   }
+}
+
+void TIM_init(){
+  TIM_TimeBaseInitTypeDef TIM3_TimeBaseInitStruct;
+  
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3,ENABLE);
+ 
+  TIM3_TimeBaseInitStruct.TIM_Prescaler = 7200 -1;  
+  TIM3_TimeBaseInitStruct.TIM_CounterMode = TIM_CounterMode_Up;
+  TIM3_TimeBaseInitStruct.TIM_Period = 10-1;  
+  TIM3_TimeBaseInitStruct.TIM_ClockDivision = TIM_CKD_DIV1;
+  TIM_TimeBaseInit(TIM3,&TIM3_TimeBaseInitStruct);
+}
+
+void delay_ms(u16 time){
+  TIM_Cmd(TIM3,ENABLE);
+
+  while(--time){
+     while(TIM_GetFlagStatus(TIM3,TIM_IT_Update)==RESET);
+     TIM_ClearFlag(TIM3,TIM_FLAG_Update);
+  }
+  TIM_Cmd(TIM3,DISABLE);
 }
